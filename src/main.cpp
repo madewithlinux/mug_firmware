@@ -4,6 +4,12 @@
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <FastLED.h>
+#define NUM_LEDS            12
+#define DATA_PIN            16
+#define BRIGHTNESS         255
+#define FRAMES_PER_SECOND  240
+
 
 #include "secrets.h"
 
@@ -34,14 +40,23 @@ struct {
 
 
 
+CRGB leds[NUM_LEDS];
+
 void setup() {
   while(!Serial) {}
   
   // Serial.begin(9600);
   Serial.begin(115200);
   Wire.begin();
-  EEPROM.begin(sizeof(eeprom_data));
 
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+  FastLED.setBrightness(BRIGHTNESS);
+  
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.show();
+
+
+  EEPROM.begin(sizeof(eeprom_data));
   // read saved data from eeprom (if there is any there)
   eeprom_data.target_temp_f = target_temp_f;
   eeprom_data.threshold_temp_f = threshold_temp_f;
@@ -56,16 +71,25 @@ void setup() {
     Serial.println("no saved data found in eeprom");
   }
 
+  fill_solid(leds, NUM_LEDS, CRGB::Yellow);
+  FastLED.show();
+
 
   WiFi.mode(WIFI_STA);
+  WiFi.hostname("mug");
   WiFi.begin(ssid, password);
   if (WiFi.waitForConnectResult() != WL_CONNECTED) {
       Serial.printf("WiFi Failed!\n");
       return;
   }
-
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
+
+  fill_solid(leds, NUM_LEDS, CRGB::Blue);
+  FastLED.show();
+
+
+#pragma region webserver
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     // request->send(200, "text/plain", "Hello, world");
@@ -146,26 +170,44 @@ void setup() {
 
   server.begin();
 
+#pragma endregion webserver
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.show();
+
   Serial.println("current_temp_f,target_temp_f,threshold_temp_f,is_heater_on");
 }
 
+
+uint8_t gHue = 0;
+
 void loop() {
-  current_temp_f = temperature.readTemperatureF();
 
-  if (current_temp_f < (target_temp_f - threshold_temp_f)) {
-    is_heater_on = true;
-  } else if (current_temp_f > (target_temp_f + threshold_temp_f)) {
-    is_heater_on = false;
+  // send the 'leds' array out to the actual LED strip
+  FastLED.show();  
+  // insert a delay to keep the framerate modest
+  FastLED.delay(1000/FRAMES_PER_SECOND);
+
+  fill_rainbow(leds, NUM_LEDS, gHue, 255/NUM_LEDS);
+  EVERY_N_MILLISECONDS( 20 ) { gHue++;}
+
+  EVERY_N_MILLISECONDS(1000) {
+    current_temp_f = temperature.readTemperatureF();
+
+    if (current_temp_f < (target_temp_f - threshold_temp_f)) {
+      is_heater_on = true;
+    } else if (current_temp_f > (target_temp_f + threshold_temp_f)) {
+      is_heater_on = false;
+    }
+    // TODO: actually set heater state
+
+    Serial.printf(
+      "%f,%f,%f,%s\n",
+      current_temp_f,
+      target_temp_f,
+      threshold_temp_f,
+      is_heater_on ? "ON" : "OFF"
+    );
   }
-  // TODO: actually set heater state
-
-  Serial.printf(
-    "%f,%f,%f,%s\n",
-    current_temp_f,
-    target_temp_f,
-    threshold_temp_f,
-    is_heater_on ? "ON" : "OFF"
-  );
-
-  delay(1000);
+  // delay(1000);
 }

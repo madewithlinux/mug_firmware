@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "Justfile": "makefile",
+        "*.bt": "cpp",
+        "*.ksy": "yaml",
+        "*.mkf": "makefile",
+        "*.lst": "lldb.disassembly",
+        "*.inc": "c",
+        "functional": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp"
+    }
+}
