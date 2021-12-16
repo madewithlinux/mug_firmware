@@ -1,20 +1,17 @@
 # Justfile
 
-ota_step_1:
-	PLATFORMIO_UPLOAD_FLAGS="--auth=$(cat ota_password.txt)" pio run -e d1_mini_lite_otaonly -t upload
-ota_step_2:
-	PLATFORMIO_UPLOAD_FLAGS="--auth=$(cat ota_password.txt)" pio run -e d1_mini_lite_ota     -t upload
 wait_for_connection:
 	while ! ping -c 1 -w 1 mug.local; do sleep 2; done
+
+do_ota ENV: wait_for_connection
+	PLATFORMIO_UPLOAD_FLAGS="--auth=$(cat ota_password.txt)" pio run -e {{ENV}} -t upload
+
+ota:
+	just do_ota d1_mini_ota
+
 full_ota:
-	# check for initial network connection (to verify that mDNS works before we bother building the firmware)
-	just wait_for_connection
-	just ota_step_1
-	sleep 2
-	# wait for it to connect to the network again
-	just wait_for_connection
-	sleep 2
-	just ota_step_2
+	just do_ota d1_mini_otaonly
+	just do_ota d1_mini_ota
 
 get_ota_flags:
 	#!/bin/bash

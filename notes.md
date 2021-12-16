@@ -26,10 +26,13 @@ https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
 - [x] assign it a static IP in my router
   * had to use the router's own diagnostics to ping it by the IP address, for it to show up in the device list
   * I guess the router didn't know about it since it wasn't connecting to the internet?
-- [ ] fix mDNS
+- [x] fix mDNS
   * having the ESP do a MDNS query every minute did not fix it
+  * it seems that `MDNS.announce();` every minute did fix it, though
+- [x] fix OTA space limitation by using the correct board spec in `platformio.ini` (should be `d1_mini`, not `d1_mini_lite`)
 - [ ] switch to stock web server? (for OTA space reasons)
 - [ ] make the webpage auto-refresh every so often?
+  * probably nah, that could lose form content and that would be annoying
 - [ ] improve LED animations
 
 

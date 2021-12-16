@@ -56,7 +56,10 @@ CRGB leds[NUM_LEDS];
 
 
 void writeControlPageResponse(AsyncResponseStream *response) {
-  response->println("<!DOCTYPE html><html><head><title>Mug</title></head><body>");
+  response->println("<!DOCTYPE html><html><head>");
+  response->println("<title>Mug</title>");
+  // response->println("<meta http-equiv=\"refresh\" content=\"10\">");
+  response->println("</head><body>");
   response->println("<style>body {margin: 20px;}</style>");
   response->println("<a href=\"/\"><h1>Mug</h1></a>");
   response->println("<p><a href=\"/\">refresh</a></p>");
@@ -205,9 +208,9 @@ void setup() {
     request->send(response);
   });
   
-  server.on("/restart", HTTP_GET, [](AsyncWebServerRequest *request){
-    ESP.restart();
+  server.on("/restart", HTTP_POST, [](AsyncWebServerRequest *request){
     request->send(200);
+    ESP.restart();
   });
   
   server.on("/", HTTP_POST, [](AsyncWebServerRequest *request){
@@ -298,9 +301,7 @@ void loop() {
   }
 
   EVERY_N_SECONDS(60) {
-      MDNS.queryService("http", "tcp");
-      delay(100);
-      MDNS.removeQuery();
+    MDNS.announce();
   }
 
   EVERY_N_SECONDS(5) {

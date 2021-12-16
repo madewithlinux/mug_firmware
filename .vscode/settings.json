@@ -1,6 +1,6 @@
 {
     "files.associations": {
-        "Justfile": "makefile",
+        "Justfile": "just",
         "*.bt": "cpp",
         "*.ksy": "yaml",
         "*.mkf": "makefile",
