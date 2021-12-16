@@ -21,3 +21,15 @@ https://docs.platformio.org/en/latest/boards/espressif8266/d1_mini.html
 https://docs.platformio.org/en/latest/platforms/espressif8266.html#over-the-air-ota-update
 https://docs.platformio.org/en/latest/projectconf/interpolation.html
 https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
+
+# TODO
+- [x] assign it a static IP in my router
+  * had to use the router's own diagnostics to ping it by the IP address, for it to show up in the device list
+  * I guess the router didn't know about it since it wasn't connecting to the internet?
+- [ ] fix mDNS
+  * having the ESP do a MDNS query every minute did not fix it
+- [ ] switch to stock web server? (for OTA space reasons)
+- [ ] make the webpage auto-refresh every so often?
+- [ ] improve LED animations
+
+

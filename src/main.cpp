@@ -78,7 +78,22 @@ void writeControlPageResponse(AsyncResponseStream *response) {
   FORM_INPUT(temp_cold)
 #undef FORM_INPUT
   response->println("<input type=\"submit\" value=\"save\">");
-  response->println("</form></body></html>");
+  response->println("</form>");
+  response->println("<div>");
+
+#define STATUS_LINE(c_str_var)              \
+  response->printf("<p>" #c_str_var ": ");  \
+  response->print((c_str_var));             \
+  response->print("</p>\n");
+  STATUS_LINE(WiFi.macAddress())
+  STATUS_LINE(WiFi.localIP())
+  STATUS_LINE(WiFi.gatewayIP())
+  STATUS_LINE(WiFi.status())
+  STATUS_LINE(MDNS.isRunning())
+#undef STATUS_LINE
+
+  response->println("</div>");
+  response->println("</body></html>");
 }
 
 #endif
@@ -190,6 +205,11 @@ void setup() {
     request->send(response);
   });
   
+  server.on("/restart", HTTP_GET, [](AsyncWebServerRequest *request){
+    ESP.restart();
+    request->send(200);
+  });
+  
   server.on("/", HTTP_POST, [](AsyncWebServerRequest *request){
     AsyncResponseStream *response = request->beginResponseStream("text/html");
 #define READ_PARAM(param_name)                                                \
@@ -239,6 +259,7 @@ void loop() {
   ArduinoOTA.handle();
 #endif
   MDNS.update();
+  // WiFi.getAutoConnect
 
 #ifndef OTA_ONLY
   // send the 'leds' array out to the actual LED strip
@@ -274,6 +295,12 @@ void loop() {
       // Serial.println("heater off");
     }
     digitalWrite(HEATER_PIN, is_heater_on);
+  }
+
+  EVERY_N_SECONDS(60) {
+      MDNS.queryService("http", "tcp");
+      delay(100);
+      MDNS.removeQuery();
   }
 
   EVERY_N_SECONDS(5) {
