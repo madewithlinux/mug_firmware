@@ -10,6 +10,8 @@
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <FastLED.h>
+#include <CircularBuffer.h>
+#include <ESP8266Ping.h>
 #endif
 
 #define HOSTNAME            "mug"
@@ -31,11 +33,21 @@ const char* password = WIFI_PASSWORD;
 
 AsyncWebServer server(80);
 
+IPAddress ping_ip = IPAddress();
+int ping_count = 1;
+bool ping_ret;
+int ping_time = 1;
+    
+
 void notFound(AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
 }
 
 TI_TMP275 temperature(0x48);
+// this is to see how long it takes it to read the temperature. Conclusion is: it's plenty fast
+CircularBuffer<float, 128> buffer_temperature;
+CircularBuffer<unsigned long, 128> buffer_temp_read_time;
+
 
 float current_temp_f = 125;
 float target_temp_f = 125;
@@ -58,7 +70,8 @@ CRGB leds[NUM_LEDS];
 void writeControlPageResponse(AsyncResponseStream *response) {
   response->println("<!DOCTYPE html><html><head>");
   response->println("<title>Mug</title>");
-  // response->println("<meta http-equiv=\"refresh\" content=\"10\">");
+  response->println("<meta http-equiv=\"refresh\" content=\"10\">");
+  response->println("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
   response->println("</head><body>");
   response->println("<style>body {margin: 20px;}</style>");
   response->println("<a href=\"/\"><h1>Mug</h1></a>");
@@ -82,8 +95,8 @@ void writeControlPageResponse(AsyncResponseStream *response) {
 #undef FORM_INPUT
   response->println("<input type=\"submit\" value=\"save\">");
   response->println("</form>");
-  response->println("<div>");
 
+  response->println("<div><h2>info</h2>");
 #define STATUS_LINE(c_str_var)              \
   response->printf("<p>" #c_str_var ": ");  \
   response->print((c_str_var));             \
@@ -94,7 +107,6 @@ void writeControlPageResponse(AsyncResponseStream *response) {
   STATUS_LINE(WiFi.status())
   STATUS_LINE(MDNS.isRunning())
 #undef STATUS_LINE
-
   response->println("</div>");
   response->println("</body></html>");
 }
@@ -213,6 +225,58 @@ void setup() {
     ESP.restart();
   });
   
+  server.on("/temperature_timing", HTTP_GET, [](AsyncWebServerRequest *request){
+    AsyncResponseStream *response = request->beginResponseStream("text/plain");
+    while (!buffer_temp_read_time.isEmpty() && !buffer_temperature.isEmpty()) {
+      response->print(buffer_temperature.pop());
+      response->print("\t");
+      response->print(buffer_temp_read_time.pop());
+      response->print("\n");
+    }
+    request->send(response);
+  });
+  
+  server.on("/ping", HTTP_GET, [](AsyncWebServerRequest *request){
+    AsyncResponseStream *response = request->beginResponseStream("text/html");
+
+    response->print("ip: ");
+    response->print(ping_ip);
+    response->print("\n");
+
+    response->print("count: ");
+    response->print(ping_count);
+    response->print("\n");
+
+    response->print("success: ");
+    response->print(ping_ret ? "true" : "false");
+    response->print("\n");
+
+    response->print("time: ");
+    response->print(ping_time);
+    response->print("\n");
+
+    request->send(response);
+  });
+
+  server.on("/ping", HTTP_POST, [](AsyncWebServerRequest *request){
+    AsyncResponseStream *response = request->beginResponseStream("text/html");
+
+    ping_ip.fromString(request->getParam("ip")->value());
+    response->print("ip: ");
+    response->print(ping_ip);
+    response->print("\n");
+    
+    ping_count = 1;
+    if (request->hasParam("count")) {
+      ping_count = request->getParam("count")->value().toInt();
+    }
+    response->print("count: ");
+    response->print(ping_count);
+    response->print("\n");
+
+    request->send(response);
+  });
+
   server.on("/", HTTP_POST, [](AsyncWebServerRequest *request){
     AsyncResponseStream *response = request->beginResponseStream("text/html");
 #define READ_PARAM(param_name)                                                \
@@ -236,6 +300,7 @@ void setup() {
       request->send(response);
     }
   });
+
   server.onNotFound(notFound);
   server.begin();
 #pragma endregion webserver
@@ -289,13 +354,22 @@ void loop() {
   }
 
   EVERY_N_MILLISECONDS(100) {
+    if (ping_count > 0) {
+      ping_ret = Ping.ping(ping_ip, ping_count);
+      ping_time = Ping.averageTime();
+      ping_count = 0;
+    }
+  }
+  EVERY_N_MILLISECONDS(100) {
+    unsigned long time = micros();
     current_temp_f = temperature.readTemperatureF();
+    buffer_temp_read_time.push(micros() - time);
+    buffer_temperature.push(current_temp_f);
+
     if (current_temp_f < (target_temp_f - threshold_temp_f)) {
       is_heater_on = true;
-      // Serial.println("heater on");
     } else if (current_temp_f > (target_temp_f + threshold_temp_f)) {
       is_heater_on = false;
-      // Serial.println("heater off");
     }
     digitalWrite(HEATER_PIN, is_heater_on);
   }

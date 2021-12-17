@@ -31,8 +31,12 @@ https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
   * it seems that `MDNS.announce();` every minute did fix it, though
 - [x] fix OTA space limitation by using the correct board spec in `platformio.ini` (should be `d1_mini`, not `d1_mini_lite`)
 - [ ] switch to stock web server? (for OTA space reasons)
-- [ ] make the webpage auto-refresh every so often?
+- [x] make the webpage auto-refresh every so often?
   * probably nah, that could lose form content and that would be annoying
+  * actually yeah let's do that
 - [ ] improve LED animations
+- [ ] get it to work from my phone
+- [ ] remove all the ota only stuff
+
 
 
