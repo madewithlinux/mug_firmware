@@ -30,13 +30,15 @@ https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
   * having the ESP do a MDNS query every minute did not fix it
   * it seems that `MDNS.announce();` every minute did fix it, though
 - [x] fix OTA space limitation by using the correct board spec in `platformio.ini` (should be `d1_mini`, not `d1_mini_lite`)
-- [ ] switch to stock web server? (for OTA space reasons)
-- [x] make the webpage auto-refresh every so often?
-  * probably nah, that could lose form content and that would be annoying
-  * actually yeah let's do that
-- [ ] improve LED animations
-- [ ] get it to work from my phone
-- [ ] remove all the ota only stuff
+- [x] get it to work from my phone
+  * I finally fixed this! thanks to https://forums.att.com/conversations/att-fiber-equipment/problem-with-att-nokia-bgw320505-and-guest-wifi/606f422c4fdc0a391ada3653
+  * the fix is to go to router settings > Home Network > Wi-Fi > Advanced Settings, and change 2.4GHz wifi band to `B/G/N/AX`
+    * it was defaulted to `G/N` which actualy is a really stupid value for it to be defaulted to we well so that's weird
+- [x] make the webpage auto-refresh every so often
 
+- [ ] switch to stock web server? (for OTA space reasons)
+- [ ] improve LED animations
+- [ ] remove all the ota only stuff
+- [ ] maybe use some RTOS, like the esp one, or simba
 
 
