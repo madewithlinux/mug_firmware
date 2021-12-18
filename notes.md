@@ -1,5 +1,8 @@
 # notes.md
 
+http://192.168.1.172/
+http://mug.local/
+http://192.168.1.173/
 
 
 https://github.com/me-no-dev/ESPAsyncWebServer
@@ -35,11 +38,13 @@ https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
   * the fix is to go to router settings > Home Network > Wi-Fi > Advanced Settings, and change 2.4GHz wifi band to `B/G/N/AX`
     * it was defaulted to `G/N` which actualy is a really stupid value for it to be defaulted to we well so that's weird
 - [x] make the webpage auto-refresh every so often
+- [x] maybe use some RTOS, like the esp one, or simba
+  * nah too complicated
 
 - [x] remove all the ota only stuff
-- [ ] split code into separate files
+- [x] split code into separate files
 - [ ] switch to stock web server? (for OTA space reasons)
 - [ ] improve LED animations
-- [ ] maybe use some RTOS, like the esp one, or simba
+- [ ] use PID control for heater
 
 
