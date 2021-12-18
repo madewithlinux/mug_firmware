@@ -95,6 +95,7 @@ void loop() {
   MDNS.update();
   thermostat_loop();
   led_manager_loop();
+  webserver_loop();
 
   EVERY_N_SECONDS(60) {
     MDNS.announce();

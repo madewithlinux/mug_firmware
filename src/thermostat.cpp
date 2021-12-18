@@ -24,6 +24,18 @@ double Setpoint, Input, Output;
 double Kp = 2, Ki = 5, Kd = 1;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
+void set_heater_pwm_level(int pwm_level) {
+  if (pwm_level > PWM_MAX) {
+    pwm_level = PWM_MAX;
+  }
+  if (pwm_level < 0) {
+    pwm_level = 0;
+  }
+  analogWrite(HEATER_PIN, pwm_level);
+  pwm_output = pwm_level;
+  is_heater_on = pwm_level > 10;
+}
+
 void thermostat_setup() {
   Wire.begin();
   pinMode(HEATER_PIN, OUTPUT);
@@ -38,18 +50,6 @@ void thermostat_setup() {
   myPID.SetMode(AUTOMATIC);
 
   set_heater_pwm_level(0);
-}
-
-void set_heater_pwm_level(int pwm_level) {
-  if (pwm_level > PWM_MAX) {
-    pwm_level = PWM_MAX;
-  }
-  if (pwm_level < 0) {
-    pwm_level = 0;
-  }
-  analogWrite(HEATER_PIN, pwm_level);
-  pwm_output = pwm_level;
-  is_heater_on = pwm_level > 10;
 }
 
 void thermostat_loop() {
