@@ -1,10 +1,7 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
-#ifdef USE_OTA
 #include <ArduinoOTA.h>
-#endif
-#ifndef OTA_ONLY
 #include <Temperature_LM75_Derived.h>
 #include <ESP_EEPROM.h>
 #include <ESPAsyncTCP.h>
@@ -12,7 +9,6 @@
 #include <FastLED.h>
 #include <CircularBuffer.h>
 #include <ESP8266Ping.h>
-#endif
 
 #define HOSTNAME            "mug"
 
@@ -28,8 +24,6 @@
 const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASSWORD;
 
-
-#ifndef OTA_ONLY
 
 AsyncWebServer server(80);
 
@@ -111,22 +105,20 @@ void writeControlPageResponse(AsyncResponseStream *response) {
   response->println("</body></html>");
 }
 
-#endif
-
 void setup() {
   while(!Serial) {}
-  
-  // Serial.begin(9600);
   Serial.begin(115200);
   Serial.println("begin");
+  
+  pinMode(HEATER_PIN, OUTPUT);
+  // make sure heater is initially off
+  digitalWrite(HEATER_PIN, LOW);
 
-#ifndef OTA_ONLY
   Wire.begin();
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
   FastLED.setBrightness(BRIGHTNESS);  
   fill_solid(leds, NUM_LEDS, CRGB::Red);
   FastLED.show();
-  pinMode(HEATER_PIN, OUTPUT);
 #pragma region  read from EEPROM
   EEPROM.begin(sizeof(eeprom_data));
   // read saved data from eeprom (if there is any there)
@@ -147,7 +139,6 @@ void setup() {
   fill_solid(leds, NUM_LEDS, CRGB::Yellow);
   FastLED.show();
 #pragma endregion  read from EEPROM
-#endif
 
 
 #pragma region connect to wifi
@@ -156,26 +147,21 @@ void setup() {
   WiFi.begin(ssid, password);
   if (WiFi.waitForConnectResult() != WL_CONNECTED) {
       Serial.printf("WiFi Failed!\n");
-#ifndef OTA_ONLY
       fill_solid(leds, NUM_LEDS, CRGB::Blue); FastLED.show(); delay(1000);
       fill_solid(leds, NUM_LEDS, CRGB::Red); FastLED.show(); delay(1000);
       fill_solid(leds, NUM_LEDS, CRGB::Blue); FastLED.show(); delay(1000);
       fill_solid(leds, NUM_LEDS, CRGB::Red); FastLED.show(); delay(1000);
       fill_solid(leds, NUM_LEDS, CRGB::Blue); FastLED.show(); delay(1000);
       fill_solid(leds, NUM_LEDS, CRGB::Red); FastLED.show(); delay(1000);
-#endif
       return;
   }
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
 
-#ifndef OTA_ONLY
   fill_solid(leds, NUM_LEDS, CRGB::Blue);
   FastLED.show();
-#endif
 #pragma endregion connect to wifi
 
-#ifdef USE_OTA
 #pragma region OTA
   // Port defaults to 8266
   // ArduinoOTA.setPort(8266);
@@ -203,7 +189,6 @@ void setup() {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 #pragma endregion OTA
-#endif
 
 #pragma region mDNS
   if (MDNS.begin(HOSTNAME)) {
@@ -213,7 +198,6 @@ void setup() {
   }
 #pragma endregion mDNS
 
-#ifndef OTA_ONLY
 #pragma region webserver
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     AsyncResponseStream *response = request->beginResponseStream("text/html");
@@ -307,30 +291,25 @@ void setup() {
 #pragma endregion webserver
   fill_solid(leds, NUM_LEDS, CRGB::Green);
   FastLED.show();
-#endif
 
   Serial.println("current_temp_f,target_temp_f,threshold_temp_f,is_heater_on");
 }
 
 
 uint8_t gHue = 0;
-#ifndef OTA_ONLY
+
 void addGlitter( fract8 chanceOfGlitter) 
 {
   if( random8() < chanceOfGlitter) {
     leds[ random16(NUM_LEDS) ] += CRGB::White;
   }
 }
-#endif
 
 void loop() {
-#ifdef USE_OTA
   ArduinoOTA.handle();
-#endif
   MDNS.update();
   // WiFi.getAutoConnect
 
-#ifndef OTA_ONLY
   // send the 'leds' array out to the actual LED strip
   FastLED.show();
   // insert a delay to keep the framerate modest
@@ -388,5 +367,5 @@ void loop() {
       is_heater_on ? "ON" : "OFF"
     );
   }
-#endif
+
 }

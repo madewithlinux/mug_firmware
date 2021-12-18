@@ -36,9 +36,10 @@ https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
     * it was defaulted to `G/N` which actualy is a really stupid value for it to be defaulted to we well so that's weird
 - [x] make the webpage auto-refresh every so often
 
+- [x] remove all the ota only stuff
+- [ ] split code into separate files
 - [ ] switch to stock web server? (for OTA space reasons)
 - [ ] improve LED animations
-- [ ] remove all the ota only stuff
 - [ ] maybe use some RTOS, like the esp one, or simba
 
 
