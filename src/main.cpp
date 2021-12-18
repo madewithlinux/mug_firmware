@@ -2,8 +2,6 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>
-#include <FastLED.h>
-#include <CircularBuffer.h>
 
 #include "secrets.h"
 #include "config.h"
@@ -11,6 +9,7 @@
 #include "eeprom_manager.h"
 #include "webserver.h"
 #include "led_manager.h"
+#include "lib8tion_standalone.h"
 
 const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASSWORD;

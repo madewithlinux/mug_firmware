@@ -1,6 +1,5 @@
 #include <Temperature_LM75_Derived.h>
-// #include <lib8tion.h>
-#include <FastLED.h>
+#include "lib8tion_standalone.h"
 #include "thermostat.h"
 #include "config.h"
 
