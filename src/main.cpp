@@ -40,25 +40,31 @@ void setup() {
   }
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
-
   show_led_color(Color::Blue);
 #pragma endregion connect to wifi
 
 #pragma region OTA
-  // Port defaults to 8266
-  // ArduinoOTA.setPort(8266);
   ArduinoOTA.setHostname(HOSTNAME);
   ArduinoOTA.setPassword(OTA_PASSWORD);
   ArduinoOTA.onStart([]() {
     Serial.println("ArduinoOTA.onStart");
+    thermostat_disable();
+    current_led_state = OTA_START;
+    led_manager_loop();
   });
   ArduinoOTA.onEnd([]() {
+    current_led_state = OTA_END;
+    led_manager_loop();
     Serial.println("\nArduinoOTA.onEnd");
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    current_led_state = OTA_PROGRESS;
+    set_led_state_ota_progress(progress, total);
     Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
   });
   ArduinoOTA.onError([](ota_error_t error) {
+    current_led_state = OTA_ERROR;
+    led_manager_loop();
     Serial.printf("ArduinoOTA Error[%u]: ", error);
     if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
     else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
@@ -68,8 +74,6 @@ void setup() {
   });
   ArduinoOTA.begin();
   Serial.println("OTA Ready");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
 #pragma endregion OTA
 
 #pragma region mDNS

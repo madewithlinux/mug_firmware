@@ -4,6 +4,7 @@
 #include "config.h"
 
 TI_TMP275 temperature(0x48);
+volatile bool is_thermostat_enabled = true;
 
 volatile float current_temp_f = 125;
 volatile float target_temp_f = 125;
@@ -20,6 +21,9 @@ void thermostat_setup() {
 }
 
 void thermostat_loop() {
+  if (!is_thermostat_enabled) {
+    return;
+  }
 
   EVERY_N_MILLISECONDS(10) {
     current_temp_f = temperature.readTemperatureF();
@@ -35,4 +39,15 @@ void thermostat_loop() {
     buffer_temperature.push(current_temp_f);
   }
 
+}
+
+
+void thermostat_disable() {
+  is_thermostat_enabled = false;
+  is_heater_on = false;
+  digitalWrite(HEATER_PIN, is_heater_on);
+}
+
+void thermostat_enable() {
+  is_thermostat_enabled = true;
 }

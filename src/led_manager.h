@@ -1,6 +1,24 @@
 #pragma once
 
 typedef enum {
+  INIT,
+  WAY_TOO_COLD,
+  SLIGHTLY_TOO_COLD,
+  AT_TARGET,
+  SLIGHTLY_TOO_HOT,
+  WAY_TOO_HOT,
+  UNKNOWN_ERROR,
+  
+  OTA_START,
+  OTA_PROGRESS,
+  OTA_END,
+  OTA_ERROR,
+} led_state_t;
+extern volatile led_state_t current_led_state;
+const char* get_led_state_str();
+void set_led_state_ota_progress(unsigned int progress, unsigned int total);
+
+typedef enum {
   Black = 0x000000,
   Blue = 0x0000FF,
   BlueViolet = 0x8A2BE2,

@@ -10,3 +10,6 @@ extern CircularBuffer<float, 128> buffer_temperature;
 
 void thermostat_setup();
 void thermostat_loop();
+
+void thermostat_disable();
+void thermostat_enable();

@@ -7,6 +7,9 @@ Language: Cpp
 DerivePointerAlignment: false
 PointerAlignment: Left
 SortIncludes: false
+# AllowShortCaseLabelsOnASingleLine: true
+AlignEscapedNewlines: true
 AllowShortBlocksOnASingleLine: Never
 AllowShortFunctionsOnASingleLine: None
+ColumnLimit: 120
 ---

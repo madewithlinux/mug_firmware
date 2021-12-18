@@ -6,6 +6,7 @@
 #include "webserver.h"
 #include "thermostat.h"
 #include "eeprom_manager.h"
+#include "led_manager.h"
 
 AsyncWebServer server(80);
 
@@ -51,6 +52,7 @@ void writeControlPageResponse(AsyncResponseStream* response) {
   STATUS_LINE(WiFi.gatewayIP())
   STATUS_LINE(WiFi.status())
   STATUS_LINE(MDNS.isRunning())
+  STATUS_LINE(get_led_state_str())
 #undef STATUS_LINE
   response->println("</div>");
   response->println("</body></html>");
