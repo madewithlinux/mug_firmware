@@ -13,3 +13,7 @@ void thermostat_loop();
 
 void thermostat_disable();
 void thermostat_enable();
+
+extern int pwm_output;
+extern double Setpoint, Input, Output;
+extern double Kp, Ki, Kd;

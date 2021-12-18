@@ -46,5 +46,8 @@ https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
 - [ ] switch to stock web server? (for OTA space reasons)
 - [ ] improve LED animations
 - [ ] use PID control for heater
+- [ ] use interrupt timer or something for reading the temperature?
+  * like maybe `timer1_attachInterrupt` in `Arduino.h`
+  * or use a library
 
 
