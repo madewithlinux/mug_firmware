@@ -8,6 +8,7 @@
 #include "thermostat.h"
 #include "eeprom_manager.h"
 #include "led_manager.h"
+#include "generated/html_templates.inc"
 
 AsyncWebServer server(80);
 
@@ -76,8 +77,10 @@ void writeControlPageResponse(AsyncResponseStream* response) {
 
 void webserver_setup() {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
-    AsyncResponseStream* response = request->beginResponseStream("text/html");
-    writeControlPageResponse(response);
+    // AsyncResponseStream* response = request->beginResponseStream("text/html");
+    // writeControlPageResponse(response);
+    AsyncResponseStream* response = request->beginResponseStream("text/html", CONTROL_PAGE_SIZE_ESTIMATE);
+    write_control_page(response);
     request->send(response);
   });
 
@@ -87,7 +90,7 @@ void webserver_setup() {
   });
 
   server.on("/", HTTP_POST, [](AsyncWebServerRequest* request) {
-    AsyncResponseStream* response = request->beginResponseStream("text/html");
+    // AsyncResponseStream* response = request->beginResponseStream("text/html");
 #define READ_FLOAT_PARAM(param_name)                                            \
   if (request->hasParam(#param_name, true)) {                             \
     param_name = request->getParam(#param_name, true)->value().toFloat(); \
@@ -107,7 +110,8 @@ void webserver_setup() {
     if (!ok) {
       request->send(500, "text/plain", "failed to save state to EEPROM");
     } else {
-      writeControlPageResponse(response);
+      AsyncResponseStream* response = request->beginResponseStream("text/html", CONTROL_PAGE_SIZE_ESTIMATE);
+      write_control_page(response);
       request->send(response);
     }
   });

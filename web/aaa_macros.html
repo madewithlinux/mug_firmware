@@ -1,0 +1,9 @@
+#macro FORM_INPUT(varname)
+<p><label>{{#varname}}:
+    <input id="{{#varname}}" name="{{#varname}}" type="number" min="0" step="0.1" value="{{%.01f varname}}" /></label>
+</p>
+#endmacro
+
+#macro STATUS_LINE(varname)
+<p>{{#varname}}: {{varname}} </p>
+#endmacro
