@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Mug - system info</title>
-  <meta http-equiv="refresh" content="{{refresh_interval}}">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -11,32 +11,65 @@
   </style>
 </head>
 <body>
-  <a href="/">
+  <a href="/system-info">
     <h1>Mug system info</h1>
   </a>
-  <p><a href="/">refresh</a></p>
-  <form action="" method="post">
+  <p><a href="/system-info">refresh</a></p>
+  <form action="/update-config" method="post">
     {{FORM_INPUT(refresh_interval)}}
+    <input type="submit" value="save">
   </form>
-  <p>heater state: {{is_heater_on ? "ON" : "OFF"}} (level={{pwm_output}})</p>
-  <p>current_temp_f: {{%.02f current_temp_f}}</p>
-
 
   <div>
-    <h2>info</h2>
-    {{STATUS_LINE(WiFi.macAddress())}}
-    {{STATUS_LINE(WiFi.localIP())}}
-    {{STATUS_LINE(WiFi.gatewayIP())}}
-    {{STATUS_LINE(WiFi.status())}}
-    {{STATUS_LINE(MDNS.isRunning())}}
-    {{STATUS_LINE(get_led_state_str())}}
-    {{STATUS_LINE(digitalPinHasPWM(HEATER_PIN))}}
+
+    <h2>temperature</h2>
+    {{STATUS_LINE(is_heater_on)}}
+    {{STATUS_LINE(current_temp_f)}}
+    {{STATUS_LINE(target_temp_f)}}
+    {{STATUS_LINE(threshold_temp_f)}}
+
+    <h2>PID</h2>
     {{STATUS_LINE(Setpoint)}}
     {{STATUS_LINE(Input)}}
     {{STATUS_LINE(Output)}}
     {{STATUS_LINE(Kp)}}
     {{STATUS_LINE(Ki)}}
     {{STATUS_LINE(Kd)}}
+
+    <h2>LED</h2>
+    {{STATUS_LINE(get_led_state_str())}}
+
+    <h2>network</h2>
+    {{STATUS_LINE(WiFi.macAddress())}}
+    {{STATUS_LINE(WiFi.localIP())}}
+    {{STATUS_LINE(WiFi.gatewayIP())}}
+    {{STATUS_LINE(WiFi.status())}}
+    {{STATUS_LINE(MDNS.isRunning())}}
+
+    <h2>ESP system</h2>
+    {{STATUS_LINE(ESP.getResetReason())}}
+    {{STATUS_LINE(ESP.getFreeHeap())}}
+    {{STATUS_LINE(ESP.getHeapFragmentation())}}
+    {{STATUS_LINE(ESP.getMaxFreeBlockSize())}}
+    {{STATUS_LINE(ESP.getBootMode())}}
+    {{STATUS_LINE(ESP.getCpuFreqMHz())}}
+    {{STATUS_LINE(ESP.getFreeSketchSpace())}}
+    {{STATUS_LINE(ESP.getChipId())}}
+    {{STATUS_LINE(ESP.getCycleCount())}}
+
   </div>
 </body>
+<script>
+  for (const e of document.getElementsByTagName("input")) {
+    e.onchange = () => {
+      window.dirty = true;
+      console.log('auto-refresh disabled');
+    };
+  };
+  const interval = setInterval(() => {
+    if (!window.dirty) {
+      location.reload();
+    }
+  }, {{ refresh_interval*1000 }});
+</script>
 </html>

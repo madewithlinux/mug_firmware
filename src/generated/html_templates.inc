@@ -20,11 +20,9 @@
     response->print(" </p>");
 
 // source: control_page.html
-#define CONTROL_PAGE_SIZE_ESTIMATE 1445
+#define CONTROL_PAGE_SIZE_ESTIMATE 1311
 void write_control_page(AsyncResponseStream* response) {
-   response->print("<!DOCTYPE html> <html> <head> <title>Mug</title> <meta http-equiv=\"refresh\" content=\"");
-   response->print(refresh_interval);
-   response->print("\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/\"> <h1>Mug</h1> </a> <p><a href=\"/\">refresh</a></p> <form action=\"\" method=\"post\"> <p>heater state: ");
+   response->print("<!DOCTYPE html> <html> <head> <title>Mug</title> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/\"> <h1>Mug</h1> </a> <p><a href=\"/\">refresh</a></p> <form action=\"/update-config\" method=\"post\"> <p>heater state: ");
    response->print(is_heater_on ? "ON" : "OFF");
    response->print(" (level=");
    response->print(pwm_output);
@@ -40,63 +38,25 @@ void write_control_page(AsyncResponseStream* response) {
    FORM_INPUT(temp_cold)
    response->print(" ");
    FORM_INPUT(refresh_interval)
-   response->print(" <input type=\"submit\" value=\"save\"> </form>  <div> <h2>info</h2> ");
-   STATUS_LINE(WiFi.macAddress())
-   response->print(" ");
-   STATUS_LINE(WiFi.localIP())
-   response->print(" ");
-   STATUS_LINE(WiFi.gatewayIP())
-   response->print(" ");
-   STATUS_LINE(WiFi.status())
-   response->print(" ");
-   STATUS_LINE(MDNS.isRunning())
-   response->print(" ");
-   STATUS_LINE(get_led_state_str())
-   response->print(" ");
-   STATUS_LINE(digitalPinHasPWM(HEATER_PIN))
-   response->print(" ");
-   STATUS_LINE(Setpoint)
-   response->print(" ");
-   STATUS_LINE(Input)
-   response->print(" ");
-   STATUS_LINE(Output)
-   response->print(" ");
-   STATUS_LINE(Kp)
-   response->print(" ");
-   STATUS_LINE(Ki)
-   response->print(" ");
-   STATUS_LINE(Kd)
-   response->print(" </div> </body> </html>");
+   response->print(" <input type=\"submit\" value=\"save\"> </form> </body> <script> for (const e of document.getElementsByTagName(\"input\")) { e.onchange = () => { window.dirty = true; console.log('auto-refresh disabled'); }; }; const interval = setInterval(() => { if (!window.dirty) { location.reload(); } }, ");
+   response->print( refresh_interval*1000 );
+   response->print("); </script> </html>");
 }
 
 // source: system_info_page.html
-#define SYSTEM_INFO_PAGE_SIZE_ESTIMATE 945
+#define SYSTEM_INFO_PAGE_SIZE_ESTIMATE 1562
 void write_system_info_page(AsyncResponseStream* response) {
-   response->print("<!DOCTYPE html> <html> <head> <title>Mug - system info</title> <meta http-equiv=\"refresh\" content=\"");
-   response->print(refresh_interval);
-   response->print("\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/\"> <h1>Mug system info</h1> </a> <p><a href=\"/\">refresh</a></p> <form action=\"\" method=\"post\"> ");
+   response->print("<!DOCTYPE html> <html> <head> <title>Mug - system info</title> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/system-info\"> <h1>Mug system info</h1> </a> <p><a href=\"/system-info\">refresh</a></p> <form action=\"/update-config\" method=\"post\"> ");
    FORM_INPUT(refresh_interval)
-   response->print(" </form> <p>heater state: ");
-   response->print(is_heater_on ? "ON" : "OFF");
-   response->print(" (level=");
-   response->print(pwm_output);
-   response->print(")</p> <p>current_temp_f: ");
-   response->printf("%.02f", current_temp_f);
-   response->print("</p>   <div> <h2>info</h2> ");
-   STATUS_LINE(WiFi.macAddress())
+   response->print(" <input type=\"submit\" value=\"save\"> </form>  <div>  <h2>temperature</h2> ");
+   STATUS_LINE(is_heater_on)
    response->print(" ");
-   STATUS_LINE(WiFi.localIP())
+   STATUS_LINE(current_temp_f)
    response->print(" ");
-   STATUS_LINE(WiFi.gatewayIP())
+   STATUS_LINE(target_temp_f)
    response->print(" ");
-   STATUS_LINE(WiFi.status())
-   response->print(" ");
-   STATUS_LINE(MDNS.isRunning())
-   response->print(" ");
-   STATUS_LINE(get_led_state_str())
-   response->print(" ");
-   STATUS_LINE(digitalPinHasPWM(HEATER_PIN))
-   response->print(" ");
+   STATUS_LINE(threshold_temp_f)
+   response->print(" <h2>PID</h2> ");
    STATUS_LINE(Setpoint)
    response->print(" ");
    STATUS_LINE(Input)
@@ -108,6 +68,38 @@ void write_system_info_page(AsyncResponseStream* response) {
    STATUS_LINE(Ki)
    response->print(" ");
    STATUS_LINE(Kd)
-   response->print(" </div> </body> </html>");
+   response->print(" <h2>LED</h2> ");
+   STATUS_LINE(get_led_state_str())
+   response->print(" <h2>network</h2> ");
+   STATUS_LINE(WiFi.macAddress())
+   response->print(" ");
+   STATUS_LINE(WiFi.localIP())
+   response->print(" ");
+   STATUS_LINE(WiFi.gatewayIP())
+   response->print(" ");
+   STATUS_LINE(WiFi.status())
+   response->print(" ");
+   STATUS_LINE(MDNS.isRunning())
+   response->print(" <h2>ESP system</h2> ");
+   STATUS_LINE(ESP.getResetReason())
+   response->print(" ");
+   STATUS_LINE(ESP.getFreeHeap())
+   response->print(" ");
+   STATUS_LINE(ESP.getHeapFragmentation())
+   response->print(" ");
+   STATUS_LINE(ESP.getMaxFreeBlockSize())
+   response->print(" ");
+   STATUS_LINE(ESP.getBootMode())
+   response->print(" ");
+   STATUS_LINE(ESP.getCpuFreqMHz())
+   response->print(" ");
+   STATUS_LINE(ESP.getFreeSketchSpace())
+   response->print(" ");
+   STATUS_LINE(ESP.getChipId())
+   response->print(" ");
+   STATUS_LINE(ESP.getCycleCount())
+   response->print(" </div> </body> <script> for (const e of document.getElementsByTagName(\"input\")) { e.onchange = () => { window.dirty = true; console.log('auto-refresh disabled'); }; }; const interval = setInterval(() => { if (!window.dirty) { location.reload(); } }, ");
+   response->print( refresh_interval*1000 );
+   response->print("); </script> </html>");
 }
 
