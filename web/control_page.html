@@ -14,7 +14,10 @@
   <a href="/">
     <h1>Mug</h1>
   </a>
-  <p><a href="/">refresh</a></p>
+  <p>
+    <a href="/">refresh</a>
+    <a href="/system-info">system info</a>
+  </p>
   <form action="/update-config" method="post">
     <p>heater state: {{is_heater_on ? "ON" : "OFF"}} (level={{pwm_output}})</p>
     <p>current_temp_f: {{%.02f current_temp_f}}</p>

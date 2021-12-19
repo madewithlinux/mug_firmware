@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mug - system info</title>
+  <title>Mug system info</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
@@ -14,7 +14,10 @@
   <a href="/system-info">
     <h1>Mug system info</h1>
   </a>
-  <p><a href="/system-info">refresh</a></p>
+  <p>
+    <a href="/system-info">refresh</a>
+    <a href="/">back to control page</a>
+  </p>
   <form action="/update-config" method="post">
     {{FORM_INPUT(refresh_interval)}}
     <input type="submit" value="save">
@@ -24,7 +27,7 @@
 
     <h2>temperature</h2>
     {{STATUS_LINE(is_heater_on)}}
-    {{STATUS_LINE(current_temp_f)}}
+    <p>current_temp_f: {{%.08f current_temp_f}}</p>
     {{STATUS_LINE(target_temp_f)}}
     {{STATUS_LINE(threshold_temp_f)}}
 

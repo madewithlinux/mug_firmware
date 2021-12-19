@@ -20,9 +20,9 @@
     response->print(" </p>");
 
 // source: control_page.html
-#define CONTROL_PAGE_SIZE_ESTIMATE 1311
+#define CONTROL_PAGE_SIZE_ESTIMATE 1352
 void write_control_page(AsyncResponseStream* response) {
-   response->print("<!DOCTYPE html> <html> <head> <title>Mug</title> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/\"> <h1>Mug</h1> </a> <p><a href=\"/\">refresh</a></p> <form action=\"/update-config\" method=\"post\"> <p>heater state: ");
+   response->print("<!DOCTYPE html> <html> <head> <title>Mug</title> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/\"> <h1>Mug</h1> </a> <p> <a href=\"/\">refresh</a> <a href=\"/system-info\">system info</a> </p> <form action=\"/update-config\" method=\"post\"> <p>heater state: ");
    response->print(is_heater_on ? "ON" : "OFF");
    response->print(" (level=");
    response->print(pwm_output);
@@ -44,15 +44,15 @@ void write_control_page(AsyncResponseStream* response) {
 }
 
 // source: system_info_page.html
-#define SYSTEM_INFO_PAGE_SIZE_ESTIMATE 1562
+#define SYSTEM_INFO_PAGE_SIZE_ESTIMATE 1604
 void write_system_info_page(AsyncResponseStream* response) {
-   response->print("<!DOCTYPE html> <html> <head> <title>Mug - system info</title> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/system-info\"> <h1>Mug system info</h1> </a> <p><a href=\"/system-info\">refresh</a></p> <form action=\"/update-config\" method=\"post\"> ");
+   response->print("<!DOCTYPE html> <html> <head> <title>Mug system info</title> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/system-info\"> <h1>Mug system info</h1> </a> <p> <a href=\"/system-info\">refresh</a> <a href=\"/\">back to control page</a> </p> <form action=\"/update-config\" method=\"post\"> ");
    FORM_INPUT(refresh_interval)
    response->print(" <input type=\"submit\" value=\"save\"> </form>  <div>  <h2>temperature</h2> ");
    STATUS_LINE(is_heater_on)
-   response->print(" ");
-   STATUS_LINE(current_temp_f)
-   response->print(" ");
+   response->print(" <p>current_temp_f: ");
+   response->printf("%.08f", current_temp_f);
+   response->print("</p> ");
    STATUS_LINE(target_temp_f)
    response->print(" ");
    STATUS_LINE(threshold_temp_f)

@@ -42,14 +42,14 @@ void thermostat_setup() {
   // make sure heater is initially off
   digitalWrite(HEATER_PIN, LOW);
   analogWriteRange(PWM_MAX);
-  is_heater_on = false;
+  set_heater_pwm_level(0);
 
   Input = current_temp_f;
   Setpoint = target_temp_f;
   myPID.SetOutputLimits(0, PWM_MAX);
   myPID.SetMode(AUTOMATIC);
 
-  set_heater_pwm_level(0);
+  temperature.setResolution(temperature.Resolution_12_bits);
 }
 
 void thermostat_loop() {

@@ -40,14 +40,18 @@ https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
 - [x] make the webpage auto-refresh every so often
 - [x] maybe use some RTOS, like the esp one, or simba
   * nah too complicated
-
 - [x] remove all the ota only stuff
 - [x] split code into separate files
-- [ ] switch to stock web server? (for OTA space reasons)
+- [x] switch to stock web server? (for OTA space reasons)
+  * nah async is fine
 - [x] improve LED animations
 - [x] use PID control for heater
 - [ ] use interrupt timer or something for reading the temperature?
   * like maybe `timer1_attachInterrupt` in `Arduino.h`
   * or use a library
+
+- [ ] publish the code
+  - [ ] make sure there's no secrets in the git history (use https://rtyley.github.io/bfg-repo-cleaner/ )
+  - [ ] make github repo and push it
 
 
