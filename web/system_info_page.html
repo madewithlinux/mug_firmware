@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mug</title>
+  <title>Mug - system info</title>
   <meta http-equiv="refresh" content="{{refresh_interval}}">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
@@ -12,19 +12,15 @@
 </head>
 <body>
   <a href="/">
-    <h1>Mug</h1>
+    <h1>Mug system info</h1>
   </a>
   <p><a href="/">refresh</a></p>
   <form action="" method="post">
-    <p>heater state: {{is_heater_on ? "ON" : "OFF"}} (level={{pwm_output}})</p>
-    <p>current_temp_f: {{%.02f current_temp_f}}</p>
-    {{FORM_INPUT(target_temp_f)}}
-    {{FORM_INPUT(threshold_temp_f)}}
-    {{FORM_INPUT(temp_hot)}}
-    {{FORM_INPUT(temp_cold)}}
     {{FORM_INPUT(refresh_interval)}}
-    <input type="submit" value="save">
   </form>
+  <p>heater state: {{is_heater_on ? "ON" : "OFF"}} (level={{pwm_output}})</p>
+  <p>current_temp_f: {{%.02f current_temp_f}}</p>
+
 
   <div>
     <h2>info</h2>
