@@ -50,8 +50,25 @@ https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
   * like maybe `timer1_attachInterrupt` in `Arduino.h`
   * or use a library
 
-- [ ] publish the code
-  - [ ] make sure there's no secrets in the git history (use https://rtyley.github.io/bfg-repo-cleaner/ )
-  - [ ] make github repo and push it
+- [x] publish the code
+  - [x] make sure there's no secrets in the git history (use https://rtyley.github.io/bfg-repo-cleaner/ )
+  - [x] make github repo and push it
 
+- [ ] change the interval that temperature is read to match the TPM275 tempearture read time
+- [ ] power the TPM275 with 3.3V instead of 5V (should improve accuracy and/or read time?)
+- [ ] rebuild with ESP32-based D1 mini pro and APA102 LEDs
+
+
+
+
+# TPM275 temperature read time
+
+| res |   typ |   max |
+|----:|------:|------:|
+|   9 |  27.5 |  37.5 |
+|  10 |  55.0 |  75.0 |
+|  11 | 110.0 | 150.0 |
+|  12 | 220.0 | 300.0 |
+
+resolution in bits, typ, max in ms
 
