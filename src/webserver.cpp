@@ -17,21 +17,34 @@ void notFound(AsyncWebServerRequest* request) {
 }
 
 bool read_and_save_config(AsyncWebServerRequest* request) {
-#define READ_FLOAT_PARAM(param_name)                                      \
-  if (request->hasParam(#param_name, true)) {                             \
-    param_name = request->getParam(#param_name, true)->value().toFloat(); \
-  } else if (request->hasParam(#param_name)) {                            \
-    param_name = request->getParam(#param_name)->value().toFloat();       \
+
+#define READ_PARAM(param_name, str_method)                                   \
+  if (request->hasParam(#param_name, true)) {                                \
+    param_name = request->getParam(#param_name, true)->value().str_method(); \
+  } else if (request->hasParam(#param_name)) {                               \
+    param_name = request->getParam(#param_name)->value().str_method();       \
   }
+#define READ_FLOAT_PARAM(param_name) READ_PARAM(param_name, toFloat)
+#define READ_DOUBLE_PARAM(param_name) READ_PARAM(param_name, toDouble)
+#define READ_INT_PARAM(param_name) READ_PARAM(param_name, toInt)
+
   READ_FLOAT_PARAM(target_temp_f)
   READ_FLOAT_PARAM(threshold_temp_f)
   READ_FLOAT_PARAM(temp_hot)
   READ_FLOAT_PARAM(temp_cold)
   READ_FLOAT_PARAM(refresh_interval)
-  READ_FLOAT_PARAM(Kp)
-  READ_FLOAT_PARAM(Ki)
-  READ_FLOAT_PARAM(Kd)
+
+  READ_DOUBLE_PARAM(Kp)
+  READ_DOUBLE_PARAM(Ki)
+  READ_DOUBLE_PARAM(Kd)
+
+  READ_INT_PARAM(led_brightness)
+
 #undef READ_FLOAT_PARAM
+#undef READ_DOUBLE_PARAM
+#undef READ_INT_PARAM
+#undef READ_PARAM
+
   return save_config_to_eeprom();
 }
 

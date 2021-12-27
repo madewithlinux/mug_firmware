@@ -6,6 +6,8 @@
 #include "thermostat.h"
 #include "eeprom_manager.h"
 
+uint8_t led_brightness = BRIGHTNESS;
+
 const char* get_led_state_str() {
   switch (current_led_state) {
   case INIT:
@@ -39,7 +41,7 @@ CRGB leds[NUM_LEDS];
 
 void led_manager_setup() {
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-  FastLED.setBrightness(BRIGHTNESS);
+  FastLED.setBrightness(led_brightness);
   fill_solid(leds, NUM_LEDS, CRGB::Red);
   FastLED.show();
 }
@@ -93,15 +95,16 @@ void update_led_state() {
 }
 
 void led_manager_loop() {
-  EVERY_N_MILLISECONDS(20) {
-    gHue++;
-  }
+  // EVERY_N_MILLISECONDS(20) {
+  //   gHue++;
+  // }
 
   EVERY_N_MILLISECONDS(50) {
     update_led_state();
   }
 
   EVERY_N_MILLISECONDS(1000 / FRAMES_PER_SECOND) {
+    gHue += (1000 / FRAMES_PER_SECOND) / 4;
     int pos = beatsin16(40, 0, NUM_LEDS - 1);
     switch (current_led_state) {
     case INIT:
@@ -119,7 +122,8 @@ void led_manager_loop() {
     case SLIGHTLY_TOO_COLD:
     case SLIGHTLY_TOO_HOT:
     case AT_TARGET:
-      fill_rainbow(leds, NUM_LEDS, gHue, 255 / NUM_LEDS * 2);
+      // fill_rainbow(leds, NUM_LEDS, gHue, 255 / NUM_LEDS * 2);
+      fill_rainbow(leds, NUM_LEDS, gHue, 7);
       break;
 
       // case SLIGHTLY_TOO_HOT:
@@ -153,9 +157,12 @@ void led_manager_loop() {
       break;
     }
 
+    fill_solid(leds, NUM_LEDS_INNER_RING, CRGB::Black);
+    FastLED.setBrightness(led_brightness);
     FastLED.show();
-    // FastLED.delay(1000 / FRAMES_PER_SECOND);
   }
+
+  // FastLED.delay(1000 / FRAMES_PER_SECOND);
 }
 
 void set_led_state_ota_progress(unsigned int progress, unsigned int total) {

@@ -57,7 +57,7 @@ void thermostat_loop() {
     return;
   }
 
-  EVERY_N_MILLISECONDS(10) {
+  EVERY_N_MILLISECONDS(300) {
     current_temp_f = temperature.readTemperatureF();
 
     Input = current_temp_f;
@@ -74,7 +74,7 @@ void thermostat_loop() {
     }
   }
 
-  EVERY_N_MILLISECONDS(10) {
+  EVERY_N_MILLISECONDS(300) {
     buffer_temperature.push(current_temp_f);
   }
 }

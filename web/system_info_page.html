@@ -44,9 +44,13 @@
 
     <h2>network</h2>
     {{STATUS_LINE(WiFi.macAddress())}}
-    {{STATUS_LINE(WiFi.localIP())}}
-    {{STATUS_LINE(WiFi.gatewayIP())}}
     {{STATUS_LINE(WiFi.status())}}
+    {{STATUS_LINE(WiFi.localIP())}}
+    {{STATUS_LINE(WiFi.RSSI())}}
+    {{STATUS_LINE(WiFi.SSID())}}
+    {{STATUS_LINE(WiFi.BSSIDstr())}}
+    {{STATUS_LINE(WiFi.gatewayIP())}}
+
     {{STATUS_LINE(MDNS.isRunning())}}
 
     <h2>ESP system</h2>

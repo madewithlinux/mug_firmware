@@ -62,3 +62,5 @@ void led_manager_setup();
 void show_led_color(const Color& color);
 
 void led_manager_loop();
+
+extern uint8_t led_brightness;

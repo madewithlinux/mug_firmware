@@ -12,6 +12,16 @@
     response->print("\" type=\"number\" min=\"0\" step=\"0.1\" value=\""); \
     response->printf("%.01f", varname); \
     response->print("\" /></label> </p>");
+#define FORM_INPUT_INT(varname) \
+    response->print("<p><label>"); \
+    response->print(#varname); \
+    response->print(": <input id=\""); \
+    response->print(#varname); \
+    response->print("\" name=\""); \
+    response->print(#varname); \
+    response->print("\" type=\"number\" min=\"0\" step=\"0.1\" value=\""); \
+    response->printf("%i", varname); \
+    response->print("\" /></label> </p>");
 #define STATUS_LINE(varname) \
     response->print("<p>"); \
     response->print(#varname); \
@@ -20,7 +30,7 @@
     response->print(" </p>");
 
 // source: control_page.html
-#define CONTROL_PAGE_SIZE_ESTIMATE 1352
+#define CONTROL_PAGE_SIZE_ESTIMATE 1856
 void write_control_page(AsyncResponseStream* response) {
    response->print("<!DOCTYPE html> <html> <head> <title>Mug</title> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/\"> <h1>Mug</h1> </a> <p> <a href=\"/\">refresh</a> <a href=\"/system-info\">system info</a> </p> <form action=\"/update-config\" method=\"post\"> <p>heater state: ");
    response->print(is_heater_on ? "ON" : "OFF");
@@ -38,13 +48,21 @@ void write_control_page(AsyncResponseStream* response) {
    FORM_INPUT(temp_cold)
    response->print(" ");
    FORM_INPUT(refresh_interval)
+   response->print(" <br/> ");
+   FORM_INPUT(Kp)
+   response->print(" ");
+   FORM_INPUT(Ki)
+   response->print(" ");
+   FORM_INPUT(Kd)
+   response->print(" <br/> ");
+   FORM_INPUT_INT(led_brightness)
    response->print(" <input type=\"submit\" value=\"save\"> </form> </body> <script> for (const e of document.getElementsByTagName(\"input\")) { e.onchange = () => { window.dirty = true; console.log('auto-refresh disabled'); }; }; const interval = setInterval(() => { if (!window.dirty) { location.reload(); } }, ");
    response->print( refresh_interval*1000 );
    response->print("); </script> </html>");
 }
 
 // source: system_info_page.html
-#define SYSTEM_INFO_PAGE_SIZE_ESTIMATE 1604
+#define SYSTEM_INFO_PAGE_SIZE_ESTIMATE 1685
 void write_system_info_page(AsyncResponseStream* response) {
    response->print("<!DOCTYPE html> <html> <head> <title>Mug system info</title> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/system-info\"> <h1>Mug system info</h1> </a> <p> <a href=\"/system-info\">refresh</a> <a href=\"/\">back to control page</a> </p> <form action=\"/update-config\" method=\"post\"> ");
    FORM_INPUT(refresh_interval)
@@ -73,11 +91,17 @@ void write_system_info_page(AsyncResponseStream* response) {
    response->print(" <h2>network</h2> ");
    STATUS_LINE(WiFi.macAddress())
    response->print(" ");
+   STATUS_LINE(WiFi.status())
+   response->print(" ");
    STATUS_LINE(WiFi.localIP())
    response->print(" ");
-   STATUS_LINE(WiFi.gatewayIP())
+   STATUS_LINE(WiFi.RSSI())
    response->print(" ");
-   STATUS_LINE(WiFi.status())
+   STATUS_LINE(WiFi.SSID())
+   response->print(" ");
+   STATUS_LINE(WiFi.BSSIDstr())
+   response->print(" ");
+   STATUS_LINE(WiFi.gatewayIP())
    response->print(" ");
    STATUS_LINE(MDNS.isRunning())
    response->print(" <h2>ESP system</h2> ");

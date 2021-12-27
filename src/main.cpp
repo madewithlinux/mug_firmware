@@ -15,7 +15,8 @@ const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASSWORD;
 
 void setup() {
-  while(!Serial) {}
+  while (!Serial) {
+  }
   Serial.begin(115200);
   Serial.println("begin");
 
@@ -29,19 +30,34 @@ void setup() {
   WiFi.hostname(HOSTNAME);
   WiFi.begin(ssid, password);
   if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-      Serial.printf("WiFi Failed!\n");
-      show_led_color(Color::Blue); delay(1000);
-      show_led_color(Color::Red); delay(1000);
-      show_led_color(Color::Blue); delay(1000);
-      show_led_color(Color::Red); delay(1000);
-      show_led_color(Color::Blue); delay(1000);
-      show_led_color(Color::Red); delay(1000);
-      return;
+    Serial.printf("WiFi Failed!\n");
+    show_led_color(Color::Blue);
+    delay(1000);
+    show_led_color(Color::Red);
+    delay(1000);
+    show_led_color(Color::Blue);
+    delay(1000);
+    show_led_color(Color::Red);
+    delay(1000);
+    show_led_color(Color::Blue);
+    delay(1000);
+    show_led_color(Color::Red);
+    delay(1000);
+    return;
   }
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
   show_led_color(Color::Blue);
 #pragma endregion connect to wifi
+
+#pragma region mDNS
+  if (MDNS.begin(HOSTNAME)) {
+    Serial.println("mDNS responder started");
+  } else {
+    Serial.println("Error setting up MDNS responder!");
+  }
+#pragma endregion mDNS
+
 
 #pragma region OTA
   ArduinoOTA.setHostname(HOSTNAME);
@@ -66,23 +82,20 @@ void setup() {
     current_led_state = OTA_ERROR;
     led_manager_loop();
     Serial.printf("ArduinoOTA Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    if (error == OTA_AUTH_ERROR)
+      Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR)
+      Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR)
+      Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR)
+      Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR)
+      Serial.println("End Failed");
   });
   ArduinoOTA.begin();
   Serial.println("OTA Ready");
 #pragma endregion OTA
-
-#pragma region mDNS
-  if (MDNS.begin(HOSTNAME)) {
-    Serial.println("mDNS responder started");
-  } else {
-    Serial.println("Error setting up MDNS responder!");
-  }
-#pragma endregion mDNS
 
   webserver_setup();
   show_led_color(Color::Green);
@@ -93,22 +106,16 @@ void setup() {
 void loop() {
   ArduinoOTA.handle();
   MDNS.update();
-  thermostat_loop();
-  led_manager_loop();
-  webserver_loop();
-
   EVERY_N_SECONDS(60) {
     MDNS.announce();
   }
 
+  thermostat_loop();
+  led_manager_loop();
+  webserver_loop();
+
   EVERY_N_SECONDS(5) {
-    Serial.printf(
-      "%f,%f,%f,%s\n",
-      current_temp_f,
-      target_temp_f,
-      threshold_temp_f,
-      is_heater_on ? "ON" : "OFF"
-    );
+    Serial.printf("%f,%f,%f,%s\n", current_temp_f, target_temp_f, threshold_temp_f, is_heater_on ? "ON" : "OFF");
   }
 
 }
