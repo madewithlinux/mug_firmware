@@ -3,6 +3,8 @@
 #include <ESPAsyncWebServer.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
+#include <AsyncJson.h>
+#include <ArduinoJson.h>
 #include "config.h"
 #include "webserver.h"
 #include "thermostat.h"
@@ -73,6 +75,34 @@ void webserver_setup() {
   server.on("/system-info", HTTP_GET, [](AsyncWebServerRequest* request) {
     AsyncResponseStream* response = request->beginResponseStream("text/html", SYSTEM_INFO_PAGE_SIZE_ESTIMATE);
     write_system_info_page(response);
+    request->send(response);
+  });
+
+  server.on("/api/state", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncJsonResponse* response = new AsyncJsonResponse();
+    // response->addHeader("Server", "ESP Async Web Server");
+    const JsonObject& root = response->getRoot();
+
+    root["is_heater_on"] = is_heater_on;
+    root["current_temp_f"] = current_temp_f;
+
+    root["target_temp_f"] = target_temp_f;
+    root["threshold_temp_f"] = threshold_temp_f;
+    root["temp_hot"] = temp_hot;
+    root["temp_cold"] = temp_cold;
+    root["refresh_interval"] = refresh_interval;
+
+    root["kp"] = Kp;
+    root["ki"] = Ki;
+    root["kd"] = Kd;
+    // root["setpoint"] = Setpoint;
+    // root["input"] = Input;
+    root["output"] = Output;
+
+    root["millis"] = millis();
+    root["heap"] = ESP.getFreeHeap();
+
+    response->setLength();
     request->send(response);
   });
 
