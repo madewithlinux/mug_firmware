@@ -56,6 +56,10 @@ https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
 
 - [x] change the interval that temperature is read to match the TPM275 tempearture read time
 - [x] add an additional neopixel ring
+- [x] show uptime on main page
+- [ ] Server sent events
+
+
 - [ ] switch from FastLED to NeoPixelBus? (because it has hardware IO for esp8266)
 - [ ] power the TPM275 with 3.3V instead of 5V (should improve accuracy and/or read time?)
 - [ ] rebuild with ESP32-based D1 mini pro and APA102 LEDs

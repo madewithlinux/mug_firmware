@@ -8,7 +8,20 @@
 #include "thermostat.h"
 #include "eeprom_manager.h"
 #include "led_manager.h"
+#include "lib8tion_standalone.h"
+
 #include "generated/html_templates.inc"
+
+int uptimeS;
+int uptimeM;
+int uptimeH;
+
+void setUptime() {
+  const long millisecs = millis();
+  uptimeS = int((millisecs / (1000)) % 60);
+  uptimeM = int((millisecs / (1000 * 60)) % 60);
+  uptimeH = int((millisecs / (1000 * 60 * 60)));
+}
 
 AsyncWebServer server(80);
 
@@ -90,4 +103,7 @@ void webserver_setup() {
 }
 
 void webserver_loop() {
+  EVERY_N_SECONDS(1) {
+    setUptime();
+  }
 }

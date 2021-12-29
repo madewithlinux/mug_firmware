@@ -18,6 +18,9 @@
     <a href="/">refresh</a>
     <a href="/system-info">system info</a>
   </p>
+  <p>
+    uptime: {{%02i uptimeH}}:{{%02i uptimeM}}:{{%02i uptimeS}}
+  </p>
   <form action="/update-config" method="post">
     <p>heater state: {{is_heater_on ? "ON" : "OFF"}} (level={{pwm_output}})</p>
     <p>current_temp_f: {{%.02f current_temp_f}}</p>

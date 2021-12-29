@@ -30,9 +30,15 @@
     response->print(" </p>");
 
 // source: control_page.html
-#define CONTROL_PAGE_SIZE_ESTIMATE 1856
+#define CONTROL_PAGE_SIZE_ESTIMATE 1900
 void write_control_page(AsyncResponseStream* response) {
-   response->print("<!DOCTYPE html> <html> <head> <title>Mug</title> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/\"> <h1>Mug</h1> </a> <p> <a href=\"/\">refresh</a> <a href=\"/system-info\">system info</a> </p> <form action=\"/update-config\" method=\"post\"> <p>heater state: ");
+   response->print("<!DOCTYPE html> <html> <head> <title>Mug</title> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/\"> <h1>Mug</h1> </a> <p> <a href=\"/\">refresh</a> <a href=\"/system-info\">system info</a> </p> <p> uptime: ");
+   response->printf("%02i", uptimeH);
+   response->print(":");
+   response->printf("%02i", uptimeM);
+   response->print(":");
+   response->printf("%02i", uptimeS);
+   response->print(" </p> <form action=\"/update-config\" method=\"post\"> <p>heater state: ");
    response->print(is_heater_on ? "ON" : "OFF");
    response->print(" (level=");
    response->print(pwm_output);
