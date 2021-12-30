@@ -2,6 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>
+#include <FS.h>
 
 #include "secrets.h"
 #include "config.h"
@@ -19,6 +20,11 @@ void setup() {
   }
   Serial.begin(115200);
   Serial.println("begin");
+
+  if (!SPIFFS.begin()) {
+    Serial.println("SPIFFS Mount Failed");
+    return;
+  }
 
   thermostat_setup();
   led_manager_setup();

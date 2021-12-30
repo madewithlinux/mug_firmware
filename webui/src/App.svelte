@@ -1,30 +1,88 @@
 <script lang="ts">
-	export let name: string;
+  import ControlPage from "./ControlPage.svelte";
+  import { fetchMugState, MugState } from "./lib";
+
+  let state: MugState | undefined;
+
+  async function refreshState() {
+    state = await fetchMugState();
+    return state;
+  }
+
+  let promise = refreshState();
+  function handleClick() {
+    promise = refreshState();
+  }
+
+  let source: EventSource;
+  if (!!window.EventSource) {
+    source = new EventSource("http://192.168.1.173/events");
+
+    source.onopen = (e) => {
+      console.log("Events Connected");
+    };
+
+    source.onmessage = (e) => {
+      console.log(e);
+    };
+
+    source.addEventListener(
+      "state",
+      (e: MessageEvent) => {
+        state = JSON.parse(e.data);
+      },
+      false
+    );
+  }
 </script>
 
 <main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+  <h1>Mug</h1>
+
+  <p>
+    <!-- <button on:click={handleClick}> refresh </button> -->
+    <a href="/">refresh</a>
+    {#await promise}
+      ...loading
+    {:then state}
+      <!-- <p>state: {state}</p> -->
+    {:catch error}
+      <p style="color: red">error: {error.message}</p>
+    {/await}
+  </p>
+
+  {#if state}
+    <ControlPage remoteState={state} />
+  {/if}
 </main>
 
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
+  :global(body) {
+    /* color: #333; */
+    margin: 0 20px;
+    padding: 8px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell,
+      "Helvetica Neue", sans-serif;
+    font-size: 1.2rem;
+  }
 
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
+  main {
+    /* padding: 1em; */
+    padding-left: 1em;
+    padding-right: 1em;
+    /* max-width: 240px; */
+    margin: 0 auto;
+  }
 
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
+  @media (max-width: 1000px) {
+    :global(body) {
+      padding: 0;
+    }
+    main {
+      max-width: none;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+  }
 </style>

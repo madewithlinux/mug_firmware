@@ -5,6 +5,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import sveltePreprocess from 'svelte-preprocess';
 import typescript from '@rollup/plugin-typescript';
+import { visualizer } from 'rollup-plugin-visualizer';
 import css from 'rollup-plugin-css-only';
 
 const production = !process.env.ROLLUP_WATCH;
@@ -75,7 +76,32 @@ export default {
 
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify
-		production && terser()
+		production && terser({
+			format: {
+				ecma: 2015,
+			},
+			mangle: {
+				toplevel: true,
+			},
+			compress: {
+				ecma: 2015,
+				toplevel: true,
+				hoist_funs: true,
+				passes: 3,
+				unsafe: true,
+				unsafe_comps: true,
+				unsafe_Function: true,
+				unsafe_math: true,
+				unsafe_symbols: true,
+				unsafe_methods: true,
+				unsafe_proto: true,
+				unsafe_regexp: true,
+				unsafe_undefined: true,
+			},
+			ecma: 2015,
+			toplevel: true,
+		}),
+		visualizer(),
 	],
 	watch: {
 		clearScreen: false

@@ -5,6 +5,8 @@
 #include <ESP8266mDNS.h>
 #include <AsyncJson.h>
 #include <ArduinoJson.h>
+#include <FS.h>
+
 #include "config.h"
 #include "webserver.h"
 #include "thermostat.h"
@@ -25,10 +27,41 @@ void setUptime() {
   uptimeH = int((millisecs / (1000 * 60 * 60)));
 }
 
+String get_state_json_str() {
+  DynamicJsonDocument doc(1024);
+  doc["millis"] = millis();
+
+  doc["is_heater_on"] = is_heater_on;
+  doc["pwm_output"] = pwm_output;
+  doc["current_temp_f"] = current_temp_f;
+
+  doc["target_temp_f"] = target_temp_f;
+  doc["threshold_temp_f"] = threshold_temp_f;
+  doc["temp_hot"] = temp_hot;
+  doc["temp_cold"] = temp_cold;
+  doc["refresh_interval"] = refresh_interval;
+
+  doc["kp"] = Kp;
+  doc["ki"] = Ki;
+  doc["kd"] = Kd;
+  doc["output"] = Output;
+
+  doc["led_brightness"] = led_brightness;
+
+  String output;
+  serializeJson(doc, output);
+  return output;
+}
+
 AsyncWebServer server(80);
+AsyncEventSource events("/events");
 
 void notFound(AsyncWebServerRequest* request) {
-  request->send(404, "text/plain", "Not found");
+  if (request->method() == HTTP_OPTIONS) {
+    request->send(200);
+  } else {
+    request->send(404);
+  }
 }
 
 bool read_and_save_config(AsyncWebServerRequest* request) {
@@ -72,6 +105,19 @@ void webserver_setup() {
     request->send(response);
   });
 
+  // if (SPIFFS.exists("/last-modified")) {
+  //   File file = SPIFFS.open("/last-modified", "r");
+  File file = SPIFFS.open("/last-modified", "r");
+  if (file) {
+    String last_modified = file.readString();
+    Serial.println("read last modified: " + last_modified);
+    server.serveStatic("/", SPIFFS, "/www/").setLastModified(last_modified.c_str());
+  } else {
+    Serial.println("last modified file not found");
+    server.serveStatic("/", SPIFFS, "/www/");
+  }
+  // server.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
+
   server.on("/system-info", HTTP_GET, [](AsyncWebServerRequest* request) {
     AsyncResponseStream* response = request->beginResponseStream("text/html", SYSTEM_INFO_PAGE_SIZE_ESTIMATE);
     write_system_info_page(response);
@@ -79,32 +125,31 @@ void webserver_setup() {
   });
 
   server.on("/api/state", HTTP_GET, [](AsyncWebServerRequest* request) {
-    AsyncJsonResponse* response = new AsyncJsonResponse();
-    // response->addHeader("Server", "ESP Async Web Server");
-    const JsonObject& root = response->getRoot();
-
-    root["is_heater_on"] = is_heater_on;
-    root["current_temp_f"] = current_temp_f;
-
-    root["target_temp_f"] = target_temp_f;
-    root["threshold_temp_f"] = threshold_temp_f;
-    root["temp_hot"] = temp_hot;
-    root["temp_cold"] = temp_cold;
-    root["refresh_interval"] = refresh_interval;
-
-    root["kp"] = Kp;
-    root["ki"] = Ki;
-    root["kd"] = Kd;
-    // root["setpoint"] = Setpoint;
-    // root["input"] = Input;
-    root["output"] = Output;
-
-    root["millis"] = millis();
-    root["heap"] = ESP.getFreeHeap();
-
-    response->setLength();
-    request->send(response);
+    String state_json_str = get_state_json_str();
+    request->send(200, "application/json", state_json_str);
   });
+
+  AsyncCallbackJsonWebHandler* handler =
+      new AsyncCallbackJsonWebHandler("/api/state", [](AsyncWebServerRequest* request, JsonVariant& json) {
+        const JsonObject& jsonObj = json.as<JsonObject>();
+
+        target_temp_f = jsonObj["target_temp_f"] | target_temp_f;
+        threshold_temp_f = jsonObj["threshold_temp_f"] | threshold_temp_f;
+        temp_hot = jsonObj["temp_hot"] | temp_hot;
+        temp_cold = jsonObj["temp_cold"] | temp_cold;
+        refresh_interval = jsonObj["refresh_interval"] | refresh_interval;
+        Kp = jsonObj["Kp"] | Kp;
+        Ki = jsonObj["Ki"] | Ki;
+        Kd = jsonObj["Kd"] | Kd;
+        led_brightness = jsonObj["led_brightness"] | led_brightness;
+
+        if (!save_config_to_eeprom()) {
+          request->send(500, "text/plain", "failed to save state to EEPROM");
+        } else {
+          request->send(200);
+        }
+      });
+  server.addHandler(handler);
 
   server.on("/restart", HTTP_POST, [](AsyncWebServerRequest* request) {
     request->send(200);
@@ -128,12 +173,28 @@ void webserver_setup() {
     }
   });
 
+  events.onConnect([](AsyncEventSourceClient* client) {
+    if (client->lastId()) {
+      Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
+    }
+    String state_json_str = get_state_json_str();
+    // client->send(state_json_str.c_str(), "state", millis(), uint32_t(refresh_interval * 1000.0));
+    client->send(state_json_str.c_str(), "state", millis());
+  });
+  server.addHandler(&events);
+
   server.onNotFound(notFound);
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Content-Type");
   server.begin();
 }
 
 void webserver_loop() {
   EVERY_N_SECONDS(1) {
     setUptime();
+  }
+  EVERY_N_SECONDS(10) {
+    String state_json_str = get_state_json_str();
+    events.send(state_json_str.c_str(), "state", millis());
   }
 }

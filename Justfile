@@ -19,3 +19,10 @@ full_ota:
 get_ota_flags:
 	#!/bin/bash
 	echo -n "--auth=$(cat ota_password.txt)"
+
+data_files:
+	cd webui && npm run build
+	mkdir -p data/www
+	cp -r webui/public/* data/www
+	rm -f data/www/build/bundle.js.map
+	TZ=GMT date '+%a, %d %b %Y %H:%M:%S GMT' |tr -d '\n' > data/last-modified
