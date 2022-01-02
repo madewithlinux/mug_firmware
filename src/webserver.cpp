@@ -13,6 +13,7 @@
 #include "eeprom_manager.h"
 #include "led_manager.h"
 #include "lib8tion_standalone.h"
+#include "util.h"
 
 #include "generated/html_templates.inc"
 
@@ -56,13 +57,6 @@ String get_state_json_str() {
 AsyncWebServer server(80);
 AsyncEventSource events("/events");
 
-void notFound(AsyncWebServerRequest* request) {
-  if (request->method() == HTTP_OPTIONS) {
-    request->send(200);
-  } else {
-    request->send(404);
-  }
-}
 
 bool read_and_save_config(AsyncWebServerRequest* request) {
 
@@ -98,6 +92,97 @@ bool read_and_save_config(AsyncWebServerRequest* request) {
 
 float refresh_interval = 10;
 
+void onUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
+  if (!request->_tempObject) {
+    // this is the first file in this request, so we start by deleting all the existing files under /www/
+    Serial.println("delete all existing files under /www/:");
+    Dir www = SPIFFS.openDir("/www/");
+    while (www.next()) {
+      String filename = www.fileName();
+      Serial.print("\t");
+      Serial.println(filename);
+      SPIFFS.remove(filename);
+    }
+    request->_tempObject = new bool(true);
+  }
+
+  File dest;
+  if (!index) {
+    dest = SPIFFS.open("/www/"+filename, "w");
+  } else {
+    dest = SPIFFS.open("/www/"+filename, "a");
+  }
+  if (!dest) {
+    Serial.println("failed to open file!");
+    request->send(500, "text/plain", "failed to open file!");
+    return;
+  }
+  if (!dest.seek(index)) {
+    request->send(500, "text/plain", "seek failed");
+    return;
+  }
+  if (dest.write(data, len) != len) {
+    request->send(500, "text/plain", "write failed");
+    return;
+  }
+  dest.close();
+
+  Serial.print("handled upload");
+  Serial.print(", filename: ")                ;Serial.print(filename);
+  Serial.print(", index: ")                   ;Serial.print(index);
+  // Serial.print(", (long unsigned int)data: ") ;Serial.print((long unsigned int)data);
+  Serial.print(", len: ")                     ;Serial.print(len);
+  Serial.print(", final: ")                   ;Serial.print(final);
+  Serial.println();
+}
+
+void notFound(AsyncWebServerRequest* request) {
+  if (request->method() == HTTP_OPTIONS) {
+    request->send(200);
+    return;
+  }
+
+  String url = request->url();
+  Serial.println(url);
+  
+  String gzFilepath = "/www" + url + ".gz";
+  if (SPIFFS.exists(gzFilepath)) {
+    AsyncWebServerResponse *response = nullptr;
+    if (gzFilepath.endsWith(".html.gz")) {
+      response = request->beginResponse(SPIFFS, gzFilepath, "text/html");
+    } else if (gzFilepath.endsWith(".js.gz")) {
+      response = request->beginResponse(SPIFFS, gzFilepath, "application/javascript");
+      response->addHeader("Cache-Control", "max-age=604800, immutable");
+    } else if (gzFilepath.endsWith(".css.gz")) {
+      response = request->beginResponse(SPIFFS, gzFilepath, "text/css");
+    }
+    if (response != nullptr) {
+      response->addHeader("Content-Encoding", "gzip");
+      request->send(response);
+      return;
+    }
+  }
+
+  String filepath = "/www" + url;
+  if (SPIFFS.exists(filepath)) {
+    AsyncWebServerResponse *response = nullptr;
+    if (filepath.endsWith(".html")) {  
+      response = request->beginResponse(SPIFFS, filepath, "text/html");
+    } else if (filepath.endsWith(".js")) {
+      response = request->beginResponse(SPIFFS, filepath, "application/javascript");
+      response->addHeader("Cache-Control", "max-age=604800, immutable");
+    } else if (filepath.endsWith(".css")) {
+      response = request->beginResponse(SPIFFS, filepath, "text/css");
+    }
+    if (response != nullptr) {
+      request->send(response);
+      return;
+    }
+  }
+
+  request->send(404);
+}
+
 void webserver_setup() {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
     AsyncResponseStream* response = request->beginResponseStream("text/html", CONTROL_PAGE_SIZE_ESTIMATE);
@@ -105,18 +190,16 @@ void webserver_setup() {
     request->send(response);
   });
 
-  // if (SPIFFS.exists("/last-modified")) {
-  //   File file = SPIFFS.open("/last-modified", "r");
-  File file = SPIFFS.open("/last-modified", "r");
-  if (file) {
-    String last_modified = file.readString();
-    Serial.println("read last modified: " + last_modified);
-    server.serveStatic("/", SPIFFS, "/www/").setLastModified(last_modified.c_str());
-  } else {
-    Serial.println("last modified file not found");
-    server.serveStatic("/", SPIFFS, "/www/");
-  }
-  // server.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
+  server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse *response = nullptr;
+    if (SPIFFS.exists("/www/index.html.gz")) {
+      response = request->beginResponse(SPIFFS, "/www/index.html.gz", "text/html");
+      response->addHeader("Content-Encoding", "gzip");
+    } else {
+      response = request->beginResponse(SPIFFS, "/www/index.html", "text/html");
+    }
+    request->send(response);
+  });
 
   server.on("/system-info", HTTP_GET, [](AsyncWebServerRequest* request) {
     AsyncResponseStream* response = request->beginResponseStream("text/html", SYSTEM_INFO_PAGE_SIZE_ESTIMATE);
@@ -129,7 +212,23 @@ void webserver_setup() {
     request->send(200, "application/json", state_json_str);
   });
 
-  AsyncCallbackJsonWebHandler* handler =
+  server.on("/api/replace_static_files", HTTP_POST, [](AsyncWebServerRequest* request) {
+    Serial.println("POST to /api/replace_static_files");
+    const int params = request->params();
+    for (int i = 0; i < params; i++) {
+      AsyncWebParameter* p = request->getParam(i);
+      if (p->isFile()) { // p->isPost() is also true
+        Serial.printf("FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
+      } else if (p->isPost()) {
+        Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+      } else {
+        Serial.printf("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+      }
+    }
+    request->send(200);
+  }, onUpload);
+
+  AsyncCallbackJsonWebHandler* updateStateHandler =
       new AsyncCallbackJsonWebHandler("/api/state", [](AsyncWebServerRequest* request, JsonVariant& json) {
         const JsonObject& jsonObj = json.as<JsonObject>();
 
@@ -149,7 +248,7 @@ void webserver_setup() {
           request->send(200);
         }
       });
-  server.addHandler(handler);
+  server.addHandler(updateStateHandler);
 
   server.on("/restart", HTTP_POST, [](AsyncWebServerRequest* request) {
     request->send(200);
@@ -167,9 +266,6 @@ void webserver_setup() {
         // we don't know where to send them back to, so just send them back to homepage
         request->redirect("/");
       }
-      // AsyncResponseStream* response = request->beginResponseStream("text/html", CONTROL_PAGE_SIZE_ESTIMATE);
-      // write_control_page(response);
-      // request->send(response);
     }
   });
 
@@ -197,4 +293,9 @@ void webserver_loop() {
     String state_json_str = get_state_json_str();
     events.send(state_json_str.c_str(), "state", millis());
   }
+}
+
+void webserver_end() {
+  server.end();
+  events.close();
 }

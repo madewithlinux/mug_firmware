@@ -104,19 +104,19 @@
     justify-self: stretch;
     align-self: stretch;
   }
-  input,
-  select {
+  /* select, */
+  input {
     justify-self: end;
   }
   input[type="number"] {
     width: 140px;
     text-align: end;
   }
-  select {
+  /* select {
     width: min-content;
-  }
-  button,
-  input[type="submit"] {
+  } */
+  /* input[type="submit"], */
+  button {
     margin: 20px;
     padding: 10px;
   }

@@ -25,6 +25,12 @@ https://docs.platformio.org/en/latest/platforms/espressif8266.html#over-the-air-
 https://docs.platformio.org/en/latest/projectconf/interpolation.html
 https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
 
+
+# webdev notes
+https://github.com/rollup/plugins/tree/master/packages/html
+
+
+
 # TODO
 - [x] assign it a static IP in my router
   * had to use the router's own diagnostics to ping it by the IP address, for it to show up in the device list
@@ -57,7 +63,12 @@ https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
 - [x] change the interval that temperature is read to match the TPM275 tempearture read time
 - [x] add an additional neopixel ring
 - [x] show uptime on main page
-- [ ] Server sent events
+
+- [x] Server sent events
+- [x] headers indicating that content shall be cached
+- [x] cache-busting URLs
+  - [x] for javascript
+  - [x] for CSS (actually nah, just make svelte include it in the js)
 
 
 - [ ] switch from FastLED to NeoPixelBus? (because it has hardware IO for esp8266)
