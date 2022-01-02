@@ -55,7 +55,7 @@ String get_state_json_str() {
 }
 
 AsyncWebServer server(80);
-AsyncEventSource events("/events");
+AsyncEventSource events("/api/events");
 
 
 bool read_and_save_config(AsyncWebServerRequest* request) {
@@ -184,13 +184,13 @@ void notFound(AsyncWebServerRequest* request) {
 }
 
 void webserver_setup() {
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+  server.on("/control-page", HTTP_GET, [](AsyncWebServerRequest* request) {
     AsyncResponseStream* response = request->beginResponseStream("text/html", CONTROL_PAGE_SIZE_ESTIMATE);
     write_control_page(response);
     request->send(response);
   });
 
-  server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest* request) {
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
     AsyncWebServerResponse *response = nullptr;
     if (SPIFFS.exists("/www/index.html.gz")) {
       response = request->beginResponse(SPIFFS, "/www/index.html.gz", "text/html");
@@ -289,7 +289,7 @@ void webserver_loop() {
   EVERY_N_SECONDS(1) {
     setUptime();
   }
-  EVERY_N_SECONDS(10) {
+  EVERY_N_MILLIS(300) {
     String state_json_str = get_state_json_str();
     events.send(state_json_str.c_str(), "state", millis());
   }

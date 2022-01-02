@@ -28,7 +28,7 @@ https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
 
 # webdev notes
 https://github.com/rollup/plugins/tree/master/packages/html
-
+https://github.com/lukeed/sirv/pull/32
 
 
 # TODO
@@ -69,6 +69,7 @@ https://github.com/rollup/plugins/tree/master/packages/html
 - [x] cache-busting URLs
   - [x] for javascript
   - [x] for CSS (actually nah, just make svelte include it in the js)
+- [ ] CORS proxy in dev server
 
 
 - [ ] switch from FastLED to NeoPixelBus? (because it has hardware IO for esp8266)

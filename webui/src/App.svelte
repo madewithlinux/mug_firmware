@@ -1,4 +1,6 @@
 <script lang="ts">
+import { API_EVENTS_URL } from "./constants";
+
   import ControlPage from "./ControlPage.svelte";
   import { fetchMugState, MugState } from "./lib";
 
@@ -16,7 +18,7 @@
 
   let source: EventSource;
   if (!!window.EventSource) {
-    source = new EventSource("http://192.168.1.173/events");
+    source = new EventSource(API_EVENTS_URL);
 
     source.onopen = (e) => {
       console.log("Events Connected");
@@ -59,7 +61,7 @@
 <style>
   :global(body) {
     /* color: #333; */
-    margin: 0 20px;
+    margin: 20px 0;
     padding: 8px;
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell,
@@ -79,10 +81,10 @@
     :global(body) {
       padding: 0;
     }
-    main {
+    /* main {
       max-width: none;
       padding-left: 10px;
       padding-right: 10px;
-    }
+    } */
   }
 </style>

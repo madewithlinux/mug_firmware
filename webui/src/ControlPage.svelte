@@ -40,8 +40,7 @@
   };
 </script>
 
-<form class="config" on:submit|preventDefault={submitMugState}>
-  <!-- -->
+<form class="config" on:submit|preventDefault|stopPropagation={submitMugState}>
   <span>uptime</span><span class="num">{uptimeH}:{uptimeM}:{uptimeS}</span>
 
   <span>heater state</span>
@@ -73,22 +72,22 @@
   <label for="led_brightness">led_brightness</label>
   <input id="led_brightness" type="number" min="0" max="255" bind:value={state.led_brightness} />
 
-  <button on:click={() => (state = remoteState)}>reset</button>
-  <button on:click={submitMugState}>save</button>
-  <!-- <input type="submit" value="save" on:click={submitMugState} /> -->
+  <button on:click|stopPropagation|preventDefault={() => (state = remoteState)}>reset</button>
+  <button on:click|stopPropagation|preventDefault={submitMugState}>save</button>
 </form>
 
-<pre>
-  {JSON.stringify({ state }, undefined, " ")}
-</pre>
+<pre>{JSON.stringify(remoteState, undefined, " ")}</pre>
 
 <style>
   .config {
-    width: max-content;
-    max-width: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
+  }
+  @media (min-width: 600px) {
+    .config {
+      max-width: max-content;
+    }
   }
 
   .num {
@@ -117,7 +116,8 @@
   } */
   /* input[type="submit"], */
   button {
-    margin: 20px;
-    padding: 10px;
+    margin: 5px;
+    padding: 20px 10px;
+    font-size: 1.2rem;
   }
 </style>

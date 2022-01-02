@@ -1,3 +1,5 @@
+import { API_MUG_STATE_URL } from "./constants";
+
 export interface MugState {
   is_heater_on: boolean;
   pwm_output: number;
@@ -17,7 +19,7 @@ export interface MugState {
 }
 
 export async function fetchMugState(): Promise<MugState> {
-  const res = await fetch(`http://192.168.1.173/api/state`);
+  const res = await fetch(API_MUG_STATE_URL);
   const text = await res.json();
   if (res.ok) {
     return text;
@@ -27,7 +29,7 @@ export async function fetchMugState(): Promise<MugState> {
 }
 
 export async function postMugState(newState: MugState): Promise<MugState> {
-  const res = await fetch(`http://192.168.1.173/api/state`, {
+  const res = await fetch(API_MUG_STATE_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(newState),
