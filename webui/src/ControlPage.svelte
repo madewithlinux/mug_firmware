@@ -15,15 +15,15 @@
     .padStart(2, "0");
 
   const inputs: Record<string, HTMLInputElement> = {};
-  let state = remoteState;
-  let prevState = remoteState;
+  let state = { ...remoteState };
+  let prevState = { ...remoteState };
   const updateState = (nextState: MugState) => {
     for (const [key, value] of Object.entries(nextState)) {
       if (inputs[key] === document.activeElement) {
         continue;
       } else if (state[key] !== prevState[key]) {
         continue;
-      } else {
+      } else if (state[key] !== value) {
         state[key] = value;
       }
     }
@@ -31,16 +31,19 @@
   };
   $: updateState(remoteState);
 
+  let promise: Promise<any> | undefined = undefined;
   const submitMugState = () => {
     const newMugState = {
       ...remoteState,
       ...state,
     };
-    postMugState(newMugState);
+    promise = (async () => {
+      state = await postMugState(newMugState);
+    })();
   };
 </script>
 
-<form class="config" on:submit|preventDefault|stopPropagation={submitMugState}>
+<form class="config" on:submit|preventDefault|stopPropagation|capture={submitMugState}>
   <span>uptime</span><span class="num">{uptimeH}:{uptimeM}:{uptimeS}</span>
 
   <span>heater state</span>
@@ -67,14 +70,22 @@
   <label for="ki">ki</label><input id="ki" type="number" step="0.1" bind:value={state.ki} use:fixed={2} />
   <label for="kd">kd</label><input id="kd" type="number" step="0.1" bind:value={state.kd} use:fixed={2} />
 
-  <span>output</span><span class="num">{remoteState.output}</span>
+  <!-- <span>output</span><span class="num">{remoteState.output}</span> -->
 
   <label for="led_brightness">led_brightness</label>
   <input id="led_brightness" type="number" min="0" max="255" bind:value={state.led_brightness} />
 
-  <button on:click|stopPropagation|preventDefault={() => (state = remoteState)}>reset</button>
-  <button on:click|stopPropagation|preventDefault={submitMugState}>save</button>
+  <button type="button" on:click|stopPropagation|preventDefault={() => (state = remoteState)}>reset</button>
+  <button type="submit" on:click|stopPropagation|preventDefault={submitMugState}>save</button>
 </form>
+
+{#if promise}
+{#await promise}
+...loading
+{:catch error}
+<p style="color: red">error: {error.message}</p>
+{/await}
+{/if}
 
 <pre>{JSON.stringify(remoteState, undefined, " ")}</pre>
 

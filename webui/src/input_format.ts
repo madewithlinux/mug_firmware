@@ -6,7 +6,6 @@ export const fixed = (node: HTMLInputElement, fractionDigits: number) => {
       node.value = node.valueAsNumber.toFixed(fractionDigits);
     }
   };
-  console.log("fixed", node);
   setNumberFormat();
   node.addEventListener("change", setNumberFormat);
   return {
