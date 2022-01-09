@@ -68,7 +68,7 @@ void write_control_page(AsyncResponseStream* response) {
 }
 
 // source: system_info_page.html
-#define SYSTEM_INFO_PAGE_SIZE_ESTIMATE 1685
+#define SYSTEM_INFO_PAGE_SIZE_ESTIMATE 1712
 void write_system_info_page(AsyncResponseStream* response) {
    response->print("<!DOCTYPE html> <html> <head> <title>Mug system info</title> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/system-info\"> <h1>Mug system info</h1> </a> <p> <a href=\"/system-info\">refresh</a> <a href=\"/\">back to control page</a> </p> <form action=\"/update-config\" method=\"post\"> ");
    FORM_INPUT(refresh_interval)
@@ -128,6 +128,8 @@ void write_system_info_page(AsyncResponseStream* response) {
    STATUS_LINE(ESP.getChipId())
    response->print(" ");
    STATUS_LINE(ESP.getCycleCount())
+   response->print(" ");
+   STATUS_LINE(ESP.getSketchMD5())
    response->print(" </div> </body> <script> for (const e of document.getElementsByTagName(\"input\")) { e.onchange = () => { window.dirty = true; console.log('auto-refresh disabled'); }; }; const interval = setInterval(() => { if (!window.dirty) { location.reload(); } }, ");
    response->print( refresh_interval*1000 );
    response->print("); </script> </html>");

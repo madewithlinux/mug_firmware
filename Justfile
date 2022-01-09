@@ -51,6 +51,6 @@ upload_data_files:
 	set -x
 	curl -vvv -w '\n' \
 		$(upload_data_files_curl_args) \
-		http://192.168.1.173/api/replace_static_files
+		http://192.168.1.172/api/replace_static_files
 
 data_files: build_and_copy_data_files gzip_data_files upload_data_files
