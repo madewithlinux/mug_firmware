@@ -69,6 +69,7 @@
   <label for="kp">kp</label><input id="kp" type="number" step="0.1" bind:value={state.kp} use:fixed={2} />
   <label for="ki">ki</label><input id="ki" type="number" step="0.1" bind:value={state.ki} use:fixed={2} />
   <label for="kd">kd</label><input id="kd" type="number" step="0.1" bind:value={state.kd} use:fixed={2} />
+  <label for="max_pid_output">max_pid_output</label><input id="max_pid_output" type="number" bind:value={state.max_pid_output} />
 
   <!-- <span>output</span><span class="num">{remoteState.output}</span> -->
 

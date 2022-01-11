@@ -13,6 +13,7 @@ export interface MugState {
   ki: number;
   kd: number;
   output: number;
+  max_pid_output: number;
   led_brightness: number;
   millis: number;
   heap: number;

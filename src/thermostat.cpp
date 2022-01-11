@@ -8,13 +8,14 @@
 // #define PWM_MAX 65535
 #define PWM_MAX 1023
 int pwm_output = 0;
+int max_pid_output = PWM_MAX;
 
 TI_TMP275 temperature(0x48);
 volatile bool is_thermostat_enabled = true;
 
 volatile float current_temp_f = 125;
 volatile float target_temp_f = 125;
-volatile float threshold_temp_f = 1;
+volatile float threshold_temp_f = 10;
 volatile bool is_heater_on = false;
 CircularBuffer<float, 128> buffer_temperature;
 
@@ -46,7 +47,9 @@ void thermostat_setup() {
 
   Input = current_temp_f;
   Setpoint = target_temp_f;
-  myPID.SetOutputLimits(0, PWM_MAX);
+  // myPID.SetOutputLimits(0, PWM_MAX);
+  myPID.SetOutputLimits(0, max_pid_output);
+  myPID.SetTunings(Kp, Ki, Kd);
   myPID.SetMode(AUTOMATIC);
 
   temperature.setResolution(temperature.Resolution_12_bits);
@@ -62,6 +65,8 @@ void thermostat_loop() {
 
     Input = current_temp_f;
     Setpoint = target_temp_f;
+    myPID.SetOutputLimits(0, max_pid_output);
+    myPID.SetTunings(Kp, Ki, Kd);
     myPID.Compute();
 
     if (current_temp_f < (target_temp_f - threshold_temp_f)) {

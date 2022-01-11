@@ -16,6 +16,7 @@ struct {
   double Kp;
   double Ki;
   double Kd;
+  int max_pid_output;
   uint8_t led_brightness;
 } eeprom_data;
 
@@ -30,6 +31,7 @@ void eeprom_manager_setup() {
   eeprom_data.Kp = Kp;
   eeprom_data.Ki = Ki;
   eeprom_data.Kd = Kd;
+  eeprom_data.max_pid_output = max_pid_output;
   eeprom_data.led_brightness = led_brightness;
 
   // read saved data from eeprom (if there is any there)
@@ -44,6 +46,7 @@ void eeprom_manager_setup() {
     Kp = eeprom_data.Kp;
     Ki = eeprom_data.Ki;
     Kd = eeprom_data.Kd;
+    max_pid_output = eeprom_data.max_pid_output;
     led_brightness = eeprom_data.led_brightness;
 
   } else {
@@ -59,6 +62,7 @@ bool save_config_to_eeprom() {
   eeprom_data.Kp = Kp;
   eeprom_data.Ki = Ki;
   eeprom_data.Kd = Kd;
+  eeprom_data.max_pid_output = max_pid_output;
   eeprom_data.led_brightness = led_brightness;
   EEPROM.put(0, eeprom_data);
   bool ok = EEPROM.commit();

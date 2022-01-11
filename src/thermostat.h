@@ -16,3 +16,4 @@ void thermostat_enable();
 extern int pwm_output;
 extern double Setpoint, Input, Output;
 extern double Kp, Ki, Kd;
+extern int max_pid_output;

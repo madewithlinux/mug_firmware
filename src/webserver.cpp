@@ -46,12 +46,13 @@ String get_state_json_str() {
   doc["ki"] = Ki;
   doc["kd"] = Kd;
   doc["output"] = Output;
+  doc["max_pid_output"] = max_pid_output;
 
   doc["led_brightness"] = led_brightness;
 
-  String output;
-  serializeJson(doc, output);
-  return output;
+  String json_str;
+  serializeJson(doc, json_str);
+  return json_str;
 }
 
 AsyncWebServer server(80);
@@ -237,10 +238,11 @@ void webserver_setup() {
         temp_hot = jsonObj["temp_hot"] | temp_hot;
         temp_cold = jsonObj["temp_cold"] | temp_cold;
         refresh_interval = jsonObj["refresh_interval"] | refresh_interval;
-        Kp = jsonObj["Kp"] | Kp;
-        Ki = jsonObj["Ki"] | Ki;
-        Kd = jsonObj["Kd"] | Kd;
+        Kp = jsonObj["kp"] | Kp;
+        Ki = jsonObj["ki"] | Ki;
+        Kd = jsonObj["kd"] | Kd;
         led_brightness = jsonObj["led_brightness"] | led_brightness;
+        max_pid_output = jsonObj["max_pid_output"] | max_pid_output;
 
         if (!save_config_to_eeprom()) {
           request->send(500, "text/plain", "failed to save state to EEPROM");
