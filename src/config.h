@@ -14,3 +14,13 @@
 #define BRIGHTNESS           10
 #define FRAMES_PER_SECOND    120
 #define HEATER_PIN            15
+
+// #define TEMP_BITS     (temperature.Resolution_9_bits)
+// #define TEMP_INTERVAL 28
+#define TEMP_BITS     (temperature.Resolution_10_bits)
+#define TEMP_INTERVAL 55
+// #define TEMP_BITS     (temperature.Resolution_11_bits)
+// #define TEMP_INTERVAL 110
+// #define TEMP_BITS     (temperature.Resolution_12_bits)
+// #define TEMP_INTERVAL 220
+#define PID_INTERVAL 300

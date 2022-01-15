@@ -7,6 +7,7 @@
 
 #include "lib8tion_standalone.h"
 #include "thermostat.h"
+#include "config.h"
 #include "secrets.h"
 
 InfluxDBClient client(INFLUXDB_ADDRESS, INFLUXDB_DATABASE);
@@ -36,7 +37,7 @@ void log_to_influxdb_setup() {
 }
 
 void log_to_influxdb_loop() {
-  EVERY_N_MILLIS(300) {
+  EVERY_N_MILLIS(TEMP_INTERVAL) {
     sensor.clearFields();
 
     sensor.addField("millis", millis());
