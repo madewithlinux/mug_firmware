@@ -32,10 +32,13 @@ void setUptime() {
 String get_state_json_str() {
   DynamicJsonDocument doc(1024);
   doc["millis"] = millis();
+  doc["loops_per_second"] = loops_per_second;
 
   doc["is_heater_on"] = is_heater_on;
   doc["pwm_output"] = pwm_output;
   doc["current_temp_f"] = current_temp_f;
+  doc["current_temp_f_avg"] = current_temp_f_avg;
+  doc["current_temp_f_avg2"] = current_temp_f_avg2;
 
   doc["target_temp_f"] = target_temp_f;
   doc["threshold_temp_f"] = threshold_temp_f;
