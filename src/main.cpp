@@ -11,6 +11,7 @@
 #include "webserver.h"
 #include "led_manager.h"
 #include "log_to_influxdb.h"
+#include "loops_per_second.h"
 #include "lib8tion_standalone.h"
 
 const char* ssid = WIFI_SSID;
@@ -124,6 +125,7 @@ void loop() {
   led_manager_loop();
   webserver_loop();
   log_to_influxdb_loop();
+  loops_per_second_loop();
 
   EVERY_N_SECONDS(5) {
     Serial.printf("%f,%f,%f,%s\n", current_temp_f, target_temp_f, threshold_temp_f, is_heater_on ? "ON" : "OFF");

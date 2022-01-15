@@ -13,6 +13,7 @@
 #include "eeprom_manager.h"
 #include "led_manager.h"
 #include "lib8tion_standalone.h"
+#include "loops_per_second.h"
 #include "util.h"
 
 #include "generated/html_templates.inc"

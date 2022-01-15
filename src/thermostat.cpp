@@ -4,8 +4,10 @@
 #include "lib8tion_standalone.h"
 #include "thermostat.h"
 #include "config.h"
+#include "MovingAverage.h"
 
 CircularBuffer<float, 16> buffer_temperature;
+MovingAverage<float, 16> temperature_average2;
 
 // #define PWM_MAX 65535
 #define PWM_MAX 1023
@@ -16,6 +18,8 @@ TI_TMP275 temperature(0x48);
 volatile bool is_thermostat_enabled = true;
 
 volatile float current_temp_f = 125;
+volatile float current_temp_f_avg = 125;
+volatile float current_temp_f_avg2 = 125;
 volatile float target_temp_f = 125;
 volatile float threshold_temp_f = 10;
 volatile bool is_heater_on = false;
@@ -66,14 +70,18 @@ void thermostat_loop() {
   EVERY_N_MILLISECONDS(TEMP_INTERVAL) {
     current_temp_f = temperature.readTemperatureF();
     buffer_temperature.push(current_temp_f);
+    temperature_average2.push(current_temp_f);
+    current_temp_f_avg2 = temperature_average2.getAverage();
   }
 
   EVERY_N_MILLISECONDS(PID_INTERVAL) {
     // current_temp_f = temperature.readTemperatureF();
-    double avg = 0;
-    for (decltype(buffer_temperature)::index_t i = 0; i < buffer_temperature.size(); i++) {
-      avg += double(buffer_temperature[i]) / buffer_temperature.size();
-    }
+    // double avg = 0;
+    // for (decltype(buffer_temperature)::index_t i = 0; i < buffer_temperature.size(); i++) {
+    //   avg += double(buffer_temperature[i]) / buffer_temperature.size();
+    // }
+    // current_temp_f_avg = avg;
+    float avg = current_temp_f_avg2;
     Input = avg;
     Setpoint = target_temp_f;
     myPID.SetOutputLimits(0, max_pid_output);

@@ -1,12 +1,13 @@
 // log_to_influxdb.cpp
 // https://github.com/tobiasschuerg/InfluxDB-Client-for-Arduino/blob/master/examples/BasicWrite/BasicWrite.ino
-
 #include <ESP8266WiFi.h>
 #define DEVICE "ESP8266"
 #include <InfluxDbClient.h>
 
+#include "log_to_influxdb.h"
 #include "lib8tion_standalone.h"
 #include "thermostat.h"
+#include "loops_per_second.h"
 #include "config.h"
 #include "secrets.h"
 
@@ -43,6 +44,8 @@ void log_to_influxdb_loop() {
     sensor.addField("millis", millis());
 
     sensor.addField("current_temp_f", current_temp_f);
+    sensor.addField("current_temp_f_avg", current_temp_f_avg);
+    sensor.addField("current_temp_f_avg2", current_temp_f_avg2);
     sensor.addField("target_temp_f", target_temp_f);
     sensor.addField("threshold_temp_f", threshold_temp_f);
     sensor.addField("is_heater_on", is_heater_on);
@@ -54,6 +57,8 @@ void log_to_influxdb_loop() {
     sensor.addField("Kp", Kp);
     sensor.addField("Ki", Ki);
     sensor.addField("Kd", Kd);
+
+    sensor.addField("loops_per_second", loops_per_second);
 
     sensor.addField("wifi_rssi", WiFi.RSSI());
     sensor.addField("free_heap", ESP.getFreeHeap());

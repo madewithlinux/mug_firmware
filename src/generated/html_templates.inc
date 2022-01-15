@@ -68,7 +68,7 @@ void write_control_page(AsyncResponseStream* response) {
 }
 
 // source: system_info_page.html
-#define SYSTEM_INFO_PAGE_SIZE_ESTIMATE 1712
+#define SYSTEM_INFO_PAGE_SIZE_ESTIMATE 2218
 void write_system_info_page(AsyncResponseStream* response) {
    response->print("<!DOCTYPE html> <html> <head> <title>Mug system info</title> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <style> body { margin: 20px; } </style> </head> <body> <a href=\"/system-info\"> <h1>Mug system info</h1> </a> <p> <a href=\"/system-info\">refresh</a> <a href=\"/\">back to control page</a> </p> <form action=\"/update-config\" method=\"post\"> ");
    FORM_INPUT(refresh_interval)
@@ -111,6 +111,8 @@ void write_system_info_page(AsyncResponseStream* response) {
    response->print(" ");
    STATUS_LINE(MDNS.isRunning())
    response->print(" <h2>ESP system</h2> ");
+   STATUS_LINE(loops_per_second)
+   response->print(" ");
    STATUS_LINE(ESP.getResetReason())
    response->print(" ");
    STATUS_LINE(ESP.getFreeHeap())
@@ -130,6 +132,40 @@ void write_system_info_page(AsyncResponseStream* response) {
    STATUS_LINE(ESP.getCycleCount())
    response->print(" ");
    STATUS_LINE(ESP.getSketchMD5())
+   response->print(" <h2>build info</h2> ");
+   STATUS_LINE(sizeof(char))
+   response->print(" ");
+   STATUS_LINE(sizeof(int))
+   response->print(" ");
+   STATUS_LINE(sizeof(long int))
+   response->print(" ");
+   STATUS_LINE(sizeof(long long int))
+   response->print(" ");
+   STATUS_LINE(sizeof(unsigned))
+   response->print(" ");
+   STATUS_LINE(sizeof(unsigned char))
+   response->print(" ");
+   STATUS_LINE(sizeof(unsigned int))
+   response->print(" ");
+   STATUS_LINE(sizeof(unsigned long int))
+   response->print(" ");
+   STATUS_LINE(sizeof(unsigned long long int))
+   response->print(" ");
+   STATUS_LINE(sizeof(float))
+   response->print(" ");
+   STATUS_LINE(sizeof(double))
+   response->print(" ");
+   STATUS_LINE(sizeof(double*))
+   response->print(" ");
+   STATUS_LINE(sizeof(int*))
+   response->print(" ");
+   STATUS_LINE(sizeof(char*))
+   response->print(" ");
+   STATUS_LINE(sizeof(&webserver_setup))
+   response->print(" ");
+   STATUS_LINE(sizeof(&millis))
+   response->print(" ");
+   STATUS_LINE(sizeof(&ESP.getCycleCount))
    response->print(" </div> </body> <script> for (const e of document.getElementsByTagName(\"input\")) { e.onchange = () => { window.dirty = true; console.log('auto-refresh disabled'); }; }; const interval = setInterval(() => { if (!window.dirty) { location.reload(); } }, ");
    response->print( refresh_interval*1000 );
    response->print("); </script> </html>");

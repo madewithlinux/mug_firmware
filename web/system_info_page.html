@@ -54,6 +54,8 @@
     {{STATUS_LINE(MDNS.isRunning())}}
 
     <h2>ESP system</h2>
+    {{STATUS_LINE(loops_per_second)}}
+
     {{STATUS_LINE(ESP.getResetReason())}}
     {{STATUS_LINE(ESP.getFreeHeap())}}
     {{STATUS_LINE(ESP.getHeapFragmentation())}}
@@ -65,6 +67,28 @@
     {{STATUS_LINE(ESP.getCycleCount())}}
     {{STATUS_LINE(ESP.getSketchMD5())}}
 
+    <h2>build info</h2>
+    {{STATUS_LINE(sizeof(char))}}
+    {{STATUS_LINE(sizeof(int))}}
+    {{STATUS_LINE(sizeof(long int))}}
+    {{STATUS_LINE(sizeof(long long int))}}
+    
+    {{STATUS_LINE(sizeof(unsigned))}}
+    {{STATUS_LINE(sizeof(unsigned char))}}
+    {{STATUS_LINE(sizeof(unsigned int))}}
+    {{STATUS_LINE(sizeof(unsigned long int))}}
+    {{STATUS_LINE(sizeof(unsigned long long int))}}
+    
+    {{STATUS_LINE(sizeof(float))}}
+    {{STATUS_LINE(sizeof(double))}}
+    
+    {{STATUS_LINE(sizeof(double*))}}
+    {{STATUS_LINE(sizeof(int*))}}
+    {{STATUS_LINE(sizeof(char*))}}
+    {{STATUS_LINE(sizeof(&webserver_setup))}}
+    {{STATUS_LINE(sizeof(&millis))}}
+    {{STATUS_LINE(sizeof(&ESP.getCycleCount))}}
+    
   </div>
 </body>
 <script>

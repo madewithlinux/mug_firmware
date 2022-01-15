@@ -11,8 +11,8 @@
 
 #define DATA_PIN              16
 // #define BRIGHTNESS           255
-#define BRIGHTNESS           10
-#define FRAMES_PER_SECOND    120
+#define BRIGHTNESS            10
+#define FRAMES_PER_SECOND     60
 #define HEATER_PIN            15
 
 // #define TEMP_BITS     (temperature.Resolution_9_bits)
