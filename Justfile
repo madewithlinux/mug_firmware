@@ -12,14 +12,8 @@ do_ota ENV: wait_for_connection
 ota: generate_html_tempaltes
 	just do_ota d1_mini_ota
 
-full_ota:
-	just do_ota d1_mini_otaonly
-	just do_ota d1_mini_ota
 
-get_ota_flags:
-	#!/bin/bash
-	echo -n "--auth=$(cat ota_password.txt)"
-
+data_files: build_and_copy_data_files gzip_data_files upload_data_files
 
 build_and_copy_data_files:
 	cd webui && rm -rf dist/
@@ -52,5 +46,3 @@ upload_data_files:
 	curl -vvv -w '\n' \
 		$(upload_data_files_curl_args) \
 		http://192.168.1.172/api/replace_static_files
-
-data_files: build_and_copy_data_files gzip_data_files upload_data_files
