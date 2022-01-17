@@ -11,13 +11,13 @@
 #include "config.h"
 #include "secrets.h"
 
-InfluxDBClient client(INFLUXDB_ADDRESS, INFLUXDB_DATABASE);
+InfluxDBClient client(INFLUXDB_URL, INFLUXDB_ORG, INFLUXDB_BUCKET, INFLUXDB_TOKEN);
 
 Point sensor("mug_status");
 
 void log_to_influxdb_setup() {
-  // Set InfluxDB 1 authentication params
-  client.setConnectionParamsV1(INFLUXDB_ADDRESS, INFLUXDB_DATABASE, INFLUXDB_USER, INFLUXDB_PASSWORD);
+  configTzTime("CST6CDT", "pool.ntp.org", "time.nis.gov");
+  client.setWriteOptions(WriteOptions().writePrecision(WritePrecision::MS));
 
   // Add constant tags - only once
   sensor.addTag("device", DEVICE);

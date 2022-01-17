@@ -24,6 +24,7 @@ https://docs.platformio.org/en/latest/boards/espressif8266/d1_mini.html
 https://docs.platformio.org/en/latest/platforms/espressif8266.html#over-the-air-ota-update
 https://docs.platformio.org/en/latest/projectconf/interpolation.html
 https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
+  https://tttapa.github.io/ESP8266/Chap11%20-%20SPIFFS.html
 
 
 # webdev notes
@@ -89,4 +90,15 @@ https://github.com/lukeed/sirv/pull/32
 |  12 | 220.0 | 300.0 |
 
 resolution in bits, typ, max in ms
+
+
+
+# export from influxdb
+```bash
+docker exec -it influxdb \
+  influx -format csv -database home_db -execute 'select * from mug_status' \
+  | pv > mug_status.csv
+
+```
+
 
