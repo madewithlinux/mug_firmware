@@ -7,6 +7,8 @@ extern volatile float current_temp_f_avg2;
 extern volatile float target_temp_f;
 extern volatile float threshold_temp_f;
 extern volatile bool is_heater_on;
+extern volatile bool is_thermostat_enabled;
+extern volatile bool thermostat_fault;
 
 void thermostat_setup();
 void thermostat_loop();

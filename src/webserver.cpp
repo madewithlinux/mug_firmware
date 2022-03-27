@@ -31,6 +31,9 @@ void setUptime() {
 
 String get_state_json_str() {
   DynamicJsonDocument doc(1024);
+  if (thermostat_fault) {
+    doc["thermostat_fault"] = true;
+  }
   doc["millis"] = millis();
   doc["loops_per_second"] = loops_per_second;
 

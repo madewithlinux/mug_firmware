@@ -6,7 +6,7 @@
 #include "config.h"
 #include "MovingAverage.h"
 
-CircularBuffer<float, 16> buffer_temperature;
+// CircularBuffer<float, 16> buffer_temperature;
 MovingAverage<float, 16> temperature_average2;
 
 // #define PWM_MAX 65535
@@ -16,6 +16,7 @@ int max_pid_output = PWM_MAX;
 
 TI_TMP275 temperature(0x48);
 volatile bool is_thermostat_enabled = true;
+volatile bool thermostat_fault = false;
 
 volatile float current_temp_f = 125;
 volatile float current_temp_f_avg = 125;
@@ -63,15 +64,22 @@ void thermostat_setup() {
 }
 
 void thermostat_loop() {
-  if (!is_thermostat_enabled) {
+  if (!is_thermostat_enabled || thermostat_fault) {
+    set_heater_pwm_level(0);
     return;
   }
 
   EVERY_N_MILLISECONDS(TEMP_INTERVAL) {
     current_temp_f = temperature.readTemperatureF();
-    buffer_temperature.push(current_temp_f);
+    // buffer_temperature.push(current_temp_f);
     temperature_average2.push(current_temp_f);
     current_temp_f_avg2 = temperature_average2.getAverage();
+
+    if (temperature_average2.is_filled_with(31.88750076F)) {
+      thermostat_disable();
+      thermostat_fault = true;
+      return;
+    }
   }
 
   EVERY_N_MILLISECONDS(PID_INTERVAL) {
@@ -106,5 +114,9 @@ void thermostat_disable() {
 }
 
 void thermostat_enable() {
+  // if there ever was a thermostat fault, do not re-enable
+  if (thermostat_fault) {
+    return;
+  }
   is_thermostat_enabled = true;
 }

@@ -52,4 +52,25 @@ public:
     }
   }
 
+  bool is_filled_with(T value) {
+    // Serial.printf("is_filled_with( %.20g )\n", value);
+
+    // Serial.printf("  partial_averages.size() == %d\n", partial_averages.size());
+    // Serial.printf("  S == %d\n", S);
+    if (partial_averages.size() != S) {
+      return false;
+    }
+
+    T partial_average_fill = value / S;
+    // Serial.printf("  partial_average_fill == %d\n", partial_average_fill);
+
+    for (index_t i = 0; i < partial_averages.size(); i++) {
+      // Serial.printf("  partial_averages[%d] == %.20g\n", i, partial_averages[i]);
+      if (partial_averages[i] != partial_average_fill) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 };
